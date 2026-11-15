@@ -2023,20 +2023,45 @@
                 ctx.font = '500 20px Vazirmatn, sans-serif';
                 ctx.fillText(`${q.source}  •  تهیه شده با اپلیکیشن همراهِ یار`, W / 2, 1265);
 
-                // ۶. تبدیل به فایل JPEG با کیفیت 0.95 و دانلود خودکار
-                const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.95);
-                const link = document.createElement('a');
-                link.download = `gozaresh-mahdavi-${selectedTemplate}-${getTodayISO()}.jpg`;
-                link.href = jpegDataUrl;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
 
-                showToast('خروجی گرافیکی JPEG با موفقیت ذخیره شد 🖼️');
+                // ۶. تولید تصویر JPEG و نمایش پیش‌نمایش
+                const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+
+                const fileName = `gozaresh-mahdavi-${selectedTemplate}-${getTodayISO()}.jpg`;
+
+                window.currentJPEGPreview = {
+                    dataUrl: jpegDataUrl,
+                    fileName: fileName
+                };
+
+                document.getElementById('jpegPreviewImage').src = jpegDataUrl;
+                document.getElementById('jpegPreviewFileName').textContent = fileName;
+
+                const previewModal = document.getElementById('jpegPreviewModal');
+                previewModal.classList.remove('hidden');
+                previewModal.classList.add('flex');
             } catch (err) {
                 console.error(err);
                 showToast('خطا در تولید تصویر خروجی', true);
             }
+        }
+
+        function closeJPEGPreview() {
+            const modal = document.getElementById('jpegPreviewModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function openJPEGPreview() {
+            const preview = window.currentJPEGPreview;
+            if (!preview) return;
+
+            document.getElementById('jpegPreviewImage').src = preview.dataUrl;
+            document.getElementById('jpegPreviewFileName').textContent = preview.fileName;
+
+            const modal = document.getElementById('jpegPreviewModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
         }
 
         function roundRect(ctx, x, y, width, height, radius, fillStyle) {
