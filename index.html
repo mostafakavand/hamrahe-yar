@@ -2094,6 +2094,61 @@
             }
         }
 
+        async function saveJPEGToGallery() {
+            try {
+                const preview = window.currentJPEGPreview;
+
+                if (!preview) {
+                    showToast('تصویری برای ذخیره وجود ندارد.', true);
+                    return;
+                }
+
+                if (!window.HamrahNative?.Media) {
+                    throw new Error('Media plugin is not available.');
+                }
+
+                const albumName = 'همراه یار';
+
+                // بررسی وجود آلبوم برنامه
+                let albumsResult = await window.HamrahNative.Media.getAlbums();
+
+                let album = albumsResult.albums.find(
+                    item => item.name === albumName
+                );
+
+                // ساخت آلبوم در صورت نیاز
+                if (!album) {
+                    await window.HamrahNative.Media.createAlbum({
+                        name: albumName
+                    });
+
+                    albumsResult = await window.HamrahNative.Media.getAlbums();
+
+                    album = albumsResult.albums.find(
+                        item => item.name === albumName
+                    );
+                }
+
+                if (!album) {
+                    throw new Error('Could not create or find gallery album.');
+                }
+
+                const fileName = preview.fileName.replace(/\.jpg$/i, '');
+
+                await window.HamrahNative.Media.savePhoto({
+                    path: preview.dataUrl,
+                    albumIdentifier: album.identifier,
+                    fileName: fileName
+                });
+
+                showToast('تصویر با موفقیت در گالری ذخیره شد 🖼️');
+
+            } catch (err) {
+                console.error('Gallery save error:', err);
+                showToast('ذخیره تصویر در گالری ناموفق بود.', true);
+            }
+        }
+
         function openJPEGPreview() {
             const preview = window.currentJPEGPreview;
             if (!preview) return;
