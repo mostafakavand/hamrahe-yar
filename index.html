@@ -809,7 +809,7 @@
 
     <!-- بوم مخفی برای تولید خروجی گرافیکی باکیفیت JPEG -->
     <canvas id="jpegExportCanvas" width="1080" height="1350" class="hidden"></canvas>
-
+    <script src="./native-bridge.js"></script>
     <script>
         /* ==========================================================================
            ۱. داده‌های پیش‌فرض، جملات مهدوی و ساختار دیتابیس
@@ -2220,29 +2220,58 @@
         /* ==========================================================================
            ۸. پشتیبان‌گیری و بازیابی دیتابیس (JSON Backup & Restore)
            ========================================================================== */
-        function exportDatabaseJSON() {
+        async function exportDatabaseJSON() {
             try {
+                if (!window.SaveFile) {
+                    throw new Error('SaveFile plugin is not available.');
+                }
+
                 const payload = {
                     app: 'HamrahYarMahdavi',
                     version: 1,
                     exportedAt: new Date().toISOString(),
                     data: appState
                 };
-                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `hamrah-yar-backup-${getTodayISO()}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                showToast('فایل پشتیبان با موفقیت دانلود شد 💾');
+
+                const json = JSON.stringify(payload, null, 2);
+
+                const blob = new Blob([json], {
+                    type: 'application/json'
+                });
+
+                const dataUrl = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(reader.error);
+
+                    reader.readAsDataURL(blob);
+                });
+
+                const fileName = `hamrah-yar-backup-${getTodayISO()}.json`;
+
+                const result = await window.SaveFile.saveFile({
+                    data: dataUrl,
+                    fileName: fileName,
+                    mimeType: 'application/json'
+                });
+
+                if (result.cancelled) {
+                    showToast('ذخیره فایل لغو شد.', true);
+                    return;
+                }
+
+                const location = result.location || 'محل انتخاب‌شده در گوشی';
+
+                showToast(
+                    `فایل بکاپ با موفقیت ذخیره شد: ${location}`
+                );
+
             } catch (err) {
-                showToast('خطا در تهیه فایل پشتیبان', true);
+                console.error('Backup error:', err);
+                showToast('ذخیره فایل بکاپ ناموفق بود.', true);
             }
         }
-
         function importDatabaseJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
