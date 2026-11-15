@@ -2418,5 +2418,65 @@
             setupPWA();
         });
     </script>
+
+    <!-- JPEG Preview Modal -->
+    <div id="jpegPreviewModal"
+        class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4">
+
+        <div class="w-full max-w-md max-h-[95vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-900 p-4 shadow-2xl">
+
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-extrabold text-slate-800 dark:text-white">
+                    پیش‌نمایش تصویر
+                </h3>
+
+                <button type="button"
+                        onclick="closeJPEGPreview()"
+                        class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                    ✕
+                </button>
+            </div>
+
+            <div class="rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
+                <img id="jpegPreviewImage"
+                    src=""
+                    alt="پیش‌نمایش گزارش"
+                    class="w-full h-auto object-contain">
+            </div>
+
+            <p id="jpegPreviewFileName"
+            class="text-center text-xs text-slate-500 dark:text-slate-400 mt-3 mb-4 break-all">
+                نام تصویر
+            </p>
+
+            <div class="grid grid-cols-2 gap-2">
+
+                <button type="button"
+                        onclick="shareJPEGPreview()"
+                        class="rounded-2xl bg-emerald-600 text-white py-3 text-xs font-bold">
+                    اشتراک‌گذاری
+                </button>
+
+                <button type="button"
+                        onclick="saveJPEGToGallery()"
+                        class="rounded-2xl bg-sky-600 text-white py-3 text-xs font-bold">
+                    ذخیره در گالری
+                </button>
+
+                <button type="button"
+                        onclick="renameJPEGPreview()"
+                        class="rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 py-3 text-xs font-bold">
+                    تغییر نام
+                </button>
+
+                <button type="button"
+                        onclick="deleteJPEGPreview()"
+                        class="rounded-2xl bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 py-3 text-xs font-bold">
+                    حذف
+                </button>
+
+            </div>
+        </div>
+    </div>
 </body>
 </html>
