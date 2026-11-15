@@ -27,3 +27,16 @@ local.properties
 # Personal data and backups
 *.json.bak
 backups/
+
+# Node.js
+node_modules/
+
+# Capacitor generated files
+www/
+android/
+ios/
+
+# Signing credentials
+*.jks
+*.keystore
+*.p12
