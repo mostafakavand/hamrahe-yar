@@ -1,16 +1,19 @@
 
 {
   "name": "hamrahe-yar",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "چک‌لیست ارزیابی روزانه مهدوی",
+  "description": "Daily Mahdavi evaluation checklist",
   "scripts": {
     "copy-web": "node scripts/copy-web.js",
     "build:android": "npm run copy-web && npx cap sync android"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
-    "@capacitor/core": "^7.4.3"
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/filesystem": "^7.1.9",
+    "@capacitor/share": "^7.0.2",
+    "@capacitor-community/media": "^8.0.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.4.3"
