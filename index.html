@@ -1,0 +1,2393 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#047857">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="./icons/icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="همراهِ یار">
+    <meta name="description" content="چک‌لیست ارزیابی روزانه مهدوی، نمودار روند معنوی و اجتماعی، و ثبت عملکرد روزانه">
+    <title>همراهِ یار | چک‌لیست ارزیابی روزانه مهدوی</title>
+
+    <!-- فونت استاندارد فارسی وزیرمتن (Vazirmatn) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- کتابخانه Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'Tahoma', 'sans-serif'],
+                    },
+                    colors: {
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            200: '#a7f3d0',
+                            300: '#6ee7b7',
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        },
+                        gold: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- کتابخانه Chart.js برای رسم نمودارهای متنوع -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <style>
+        * {
+            font-family: 'Vazirmatn', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            overscroll-behavior-y: contain;
+        }
+
+        /* اسکرول‌بار سفارشی و ظریف */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(16, 185, 129, 0.3);
+            border-radius: 9999px;
+        }
+
+        /* انیمیشن تیک زدن */
+        @keyframes checkPop {
+            0% { transform: scale(0.85); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        .check-pop {
+            animation: checkPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* طرح اسلیمی ظریف در پس‌زمینه بنر */
+        .islamic-pattern {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+                              radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
+        }
+
+        /* مخفی‌سازی اسکرول افقی تب‌ها */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+
+        /* بهینه‌سازی چیدمان موبایل؛ بدون دست‌کاری فونت، رنگ، آیکون یا محتوای بصری */
+        *, *::before, *::after { box-sizing: border-box; }
+        img, canvas, svg { max-width: 100%; }
+        button, input, select, textarea { max-width: 100%; }
+
+        @media (max-width: 639px) {
+            .tab-content, .tab-content > *, .tab-content .grid > *, .tab-content .flex > * { min-width: 0; }
+            .tab-content p, .tab-content h1, .tab-content h2, .tab-content h3,
+            .tab-content label, .tab-content button, .tab-content span { overflow-wrap: anywhere; }
+            body {
+                overflow-x: hidden;
+                padding-bottom: calc(5.75rem + env(safe-area-inset-bottom)) !important;
+            }
+            header { padding-inline: 12px !important; }
+            header > div { gap: 8px; min-width: 0; }
+            header > div > div:first-child { min-width: 0; }
+            header h1 { font-size: 0.95rem; }
+            header p { line-height: 1.45; }
+
+            main {
+                width: 100%;
+                max-width: 100%;
+                padding-inline: 12px !important;
+                padding-top: 12px !important;
+                gap: 14px !important;
+            }
+            main .tab-content { gap: 14px !important; }
+            main .tab-content > .rounded-3xl,
+            main .tab-content > .bg-white { padding: 14px; }
+
+            /* جلوگیری از فشرده‌شدن متن و دکمه‌ها در ردیف‌های افقی */
+            main .flex { min-width: 0; }
+            main button, main label[for] { line-height: 1.5; }
+            #tab-checklist .flex.items-center.justify-between.gap-3,
+            #tab-checklist .flex.items-center.justify-between.gap-2 {
+                min-width: 0;
+            }
+            #pishvazToggleBtn { white-space: nowrap; }
+            #dailyNoteInput { min-height: 68px; }
+
+            /* کارت‌های چک‌لیست و ردیف‌های مدیریت در عرض کم مرتب و خوانا می‌مانند */
+            #checklistCategoriesContainer > div > div:first-child {
+                flex-wrap: wrap;
+                align-items: flex-start;
+                row-gap: 8px;
+            }
+            #checklistCategoriesContainer > div > div:first-child > span:last-child {
+                margin-inline-start: auto;
+            }
+            #checklistCategoriesContainer .group.cursor-pointer {
+                padding: 12px;
+                gap: 10px;
+            }
+            #checklistCategoriesContainer .group.cursor-pointer > div:last-child {
+                overflow-wrap: anywhere;
+                line-height: 1.7;
+            }
+            #manageItemsContainer .flex.items-center.justify-between.gap-2 {
+                flex-wrap: wrap;
+                align-items: flex-start;
+            }
+            #manageItemsContainer .truncate {
+                white-space: normal;
+                overflow: visible;
+                text-overflow: clip;
+                overflow-wrap: anywhere;
+            }
+            #manageItemsContainer .flex.items-center.gap-1\.5 {
+                margin-inline-start: auto;
+            }
+
+            /* کنترل‌های نمودار: فضای کافی برای عنوان هر گزینه */
+            #tab-analytics .chart-type-btn,
+            #tab-analytics .range-btn {
+                min-width: 0;
+                padding-inline: 5px;
+                white-space: normal;
+                line-height: 1.45;
+            }
+            #tab-analytics .grid.grid-cols-3 { gap: 7px; }
+            #tab-analytics .grid.grid-cols-3 > div { padding: 10px 6px; }
+            #tab-analytics .relative.w-full { min-width: 0; }
+
+            /* فرم ساخت دسته در موبایل به دو ردیف مرتب تبدیل می‌شود */
+            #tab-manage .flex.gap-2:has(#newCategoryTitleInput) { flex-wrap: wrap; }
+            #newCategoryTitleInput { flex: 1 1 100%; width: 100%; }
+            #newCategoryTitleInput + button { width: 100%; }
+            #tab-manage .flex.items-center.justify-between { gap: 10px; }
+
+            /* نوار پایین: چهار گزینه هم‌عرض و قابل لمس */
+            nav.fixed.bottom-0 { padding-bottom: calc(6px + env(safe-area-inset-bottom)); }
+            nav.fixed.bottom-0 > div { width: 100%; padding-inline: 2px; gap: 4px; }
+            nav.fixed.bottom-0 .nav-btn {
+                min-width: 0;
+                min-height: 48px;
+                padding: 6px 2px;
+                gap: 2px;
+            }
+            nav.fixed.bottom-0 .nav-btn svg { flex: 0 0 auto; }
+            nav.fixed.bottom-0 .nav-btn span {
+                display: block;
+                max-width: 100%;
+                font-size: 10px;
+                line-height: 1.35;
+                text-align: center;
+                white-space: normal;
+            }
+
+            /* پنجره‌ها و انتخاب‌گرها از عرض صفحه بیرون نمی‌زنند */
+            #jpegTemplatePicker > div { width: 100%; max-width: 100%; padding: 14px; }
+            #jpegTemplatePicker .grid { gap: 8px; }
+            #persianCalendar { max-width: calc(100vw - 24px); }
+        }
+
+        @media (max-width: 360px) {
+            main { padding-inline: 10px !important; }
+            #tab-analytics .grid.grid-cols-3 { gap: 5px; }
+            #tab-analytics .grid.grid-cols-3 > div { padding-inline: 4px; }
+            nav.fixed.bottom-0 .nav-btn span { font-size: 9px; }
+        }
+
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300 min-h-screen pb-24 selection:bg-emerald-500 selection:text-white">
+
+    <!-- دریافت نام کاربر در اولین ورود -->
+    <div id="profileSetupOverlay" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-950/75 backdrop-blur-md p-4">
+        <form id="profileSetupForm" class="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center text-white text-2xl shadow-lg shadow-emerald-600/20">🌿</div>
+            <div class="text-center space-y-1">
+                <h2 class="text-lg font-extrabold text-emerald-800 dark:text-emerald-400">به همراهِ یار خوش آمدید</h2>
+                <p class="text-xs leading-relaxed text-slate-500 dark:text-slate-400">برای شخصی‌سازی گزارش تصویری، لطفاً نام و نام خانوادگی خود را وارد کنید.</p>
+            </div>
+            <div class="space-y-2">
+                <label for="profileFirstName" class="block text-xs font-bold text-slate-700 dark:text-slate-300">نام</label>
+                <input id="profileFirstName" type="text" maxlength="50" autocomplete="given-name" required placeholder="نام شما" class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-3 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div class="space-y-2">
+                <label for="profileLastName" class="block text-xs font-bold text-slate-700 dark:text-slate-300">نام خانوادگی</label>
+                <input id="profileLastName" type="text" maxlength="60" autocomplete="family-name" required placeholder="نام خانوادگی شما" class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-3 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-l from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-sm font-extrabold shadow-md shadow-emerald-600/20 transition active:scale-[0.99]">ورود به برنامه</button>
+        </form>
+    </div>
+
+    <!-- انتخاب‌گر قالب خروجی همراه با پیش‌نمایش -->
+    <div id="jpegTemplatePicker" class="fixed inset-0 z-[90] hidden items-center justify-center bg-slate-950/75 backdrop-blur-md p-4" onclick="if(event.target===this) closeJpegTemplatePicker()">
+        <div class="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-900 p-5 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <h2 class="text-lg font-extrabold text-slate-800 dark:text-white">قالب گزارش تصویری را انتخاب کنید</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">روی هر طرح بزنید تا پیش‌نمایش و انتخاب آن مشخص شود.</p>
+                </div>
+                <button type="button" onclick="closeJpegTemplatePicker()" aria-label="بستن" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xl">×</button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <button type="button" data-jpeg-template="classic" onclick="selectJpegTemplate('classic')" class="jpeg-template-option text-right rounded-2xl border-2 border-emerald-500 p-2 bg-emerald-50/50 dark:bg-emerald-950/20">
+                    <div class="template-preview rounded-xl overflow-hidden aspect-[4/5] p-2 flex flex-col justify-between text-white" style="background:linear-gradient(145deg,#064e3b,#047857,#0f766e)">
+                        <div class="text-center"><div class="text-[8px] opacity-80">گزارش عملکرد روزانه</div><div class="text-[13px] font-black mt-1">همراهِ یار</div><div class="text-[7px] text-emerald-100 mt-1">گزارش اختصاصی: نام شما</div></div>
+                        <div class="rounded-lg bg-white/95 p-2 h-[48%] flex flex-col justify-end"><div class="text-[7px] text-slate-500 mb-2">روند پیشرفت</div><svg viewBox="0 0 100 45" class="w-full h-full"><path d="M2 38 Q20 30 32 34 T58 20 T98 5 L98 45 L2 45Z" fill="#059669" opacity=".2"/><path d="M2 38 Q20 30 32 34 T58 20 T98 5" fill="none" stroke="#059669" stroke-width="3"/></svg></div>
+                        <div class="rounded-lg bg-white/15 p-2 text-center text-[7px]">هر روز، یک قدم رو به رشد 🌿</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 mt-2"><span class="text-xs font-extrabold text-slate-800 dark:text-white">زمردی کلاسیک</span><span class="jpeg-template-check text-emerald-600 font-black">✓</span></div>
+                    <p class="text-[10px] text-slate-500 mt-1">قالب اصلی برنامه</p>
+                </button>
+                <button type="button" data-jpeg-template="midnight" onclick="selectJpegTemplate('midnight')" class="jpeg-template-option text-right rounded-2xl border-2 border-transparent p-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <div class="template-preview rounded-xl overflow-hidden aspect-[4/5] p-2 flex flex-col justify-between text-amber-50" style="background:linear-gradient(145deg,#111827,#1e293b,#312e81)">
+                        <div class="text-center"><div class="text-[8px] text-violet-200">گزارش عملکرد روزانه</div><div class="text-[13px] font-black mt-1">همراهِ یار</div><div class="text-[7px] text-amber-300 mt-1">گزارش اختصاصی: نام شما</div></div>
+                        <div class="rounded-lg bg-slate-50 p-2 h-[48%] flex flex-col justify-end"><div class="text-[7px] text-slate-500 mb-2">روند پیشرفت</div><svg viewBox="0 0 100 45" class="w-full h-full"><path d="M2 38 Q20 30 32 34 T58 20 T98 5 L98 45 L2 45Z" fill="#7c3aed" opacity=".2"/><path d="M2 38 Q20 30 32 34 T58 20 T98 5" fill="none" stroke="#7c3aed" stroke-width="3"/></svg></div>
+                        <div class="rounded-lg bg-white/10 p-2 text-center text-[7px]">در مسیر روشنایی ✨</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 mt-2"><span class="text-xs font-extrabold text-slate-800 dark:text-white">سرمه‌ای و طلایی</span><span class="jpeg-template-check hidden text-emerald-600 font-black">✓</span></div>
+                    <p class="text-[10px] text-slate-500 mt-1">رسمی و چشمگیر</p>
+                </button>
+                <button type="button" data-jpeg-template="rose" onclick="selectJpegTemplate('rose')" class="jpeg-template-option text-right rounded-2xl border-2 border-transparent p-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <div class="template-preview rounded-xl overflow-hidden aspect-[4/5] p-2 flex flex-col justify-between text-rose-50" style="background:linear-gradient(145deg,#881337,#be185d,#9d174d)">
+                        <div class="text-center"><div class="text-[8px] text-pink-200">گزارش عملکرد روزانه</div><div class="text-[13px] font-black mt-1">همراهِ یار</div><div class="text-[7px] text-yellow-200 mt-1">گزارش اختصاصی: نام شما</div></div>
+                        <div class="rounded-lg bg-rose-50 p-2 h-[48%] flex flex-col justify-end"><div class="text-[7px] text-slate-500 mb-2">روند پیشرفت</div><svg viewBox="0 0 100 45" class="w-full h-full"><path d="M2 38 Q20 30 32 34 T58 20 T98 5 L98 45 L2 45Z" fill="#db2777" opacity=".2"/><path d="M2 38 Q20 30 32 34 T58 20 T98 5" fill="none" stroke="#db2777" stroke-width="3"/></svg></div>
+                        <div class="rounded-lg bg-white/15 p-2 text-center text-[7px]">رشدی آرام و زیبا 🌸</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 mt-2"><span class="text-xs font-extrabold text-slate-800 dark:text-white">رزگلد لطیف</span><span class="jpeg-template-check hidden text-emerald-600 font-black">✓</span></div>
+                    <p class="text-[10px] text-slate-500 mt-1">ملایم و دلنشین</p>
+                </button>
+                <button type="button" data-jpeg-template="ivory" onclick="selectJpegTemplate('ivory')" class="jpeg-template-option text-right rounded-2xl border-2 border-transparent p-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <div class="template-preview rounded-xl overflow-hidden aspect-[4/5] p-2 flex flex-col justify-between text-cyan-50" style="background:linear-gradient(145deg,#164e63,#0e7490,#0f766e)">
+                        <div class="text-center"><div class="text-[8px] text-cyan-100">گزارش عملکرد روزانه</div><div class="text-[13px] font-black mt-1">همراهِ یار</div><div class="text-[7px] text-amber-200 mt-1">گزارش اختصاصی: نام شما</div></div>
+                        <div class="rounded-lg bg-cyan-50 p-2 h-[48%] flex flex-col justify-end"><div class="text-[7px] text-slate-500 mb-2">روند پیشرفت</div><svg viewBox="0 0 100 45" class="w-full h-full"><path d="M2 38 Q20 30 32 34 T58 20 T98 5 L98 45 L2 45Z" fill="#0e7490" opacity=".2"/><path d="M2 38 Q20 30 32 34 T58 20 T98 5" fill="none" stroke="#0e7490" stroke-width="3"/></svg></div>
+                        <div class="rounded-lg bg-white/15 p-2 text-center text-[7px]">تعادل و آرامش 🩵</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 mt-2"><span class="text-xs font-extrabold text-slate-800 dark:text-white">کاغذی و فیروزه‌ای</span><span class="jpeg-template-check hidden text-emerald-600 font-black">✓</span></div>
+                    <p class="text-[10px] text-slate-500 mt-1">روشن و آرامش‌بخش</p>
+                </button>
+                <button type="button" data-jpeg-template="sky" onclick="selectJpegTemplate('sky')" class="jpeg-template-option text-right rounded-2xl border-2 border-transparent p-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <div class="template-preview rounded-xl overflow-hidden aspect-[4/5] p-2 flex flex-col justify-between text-white" style="background:linear-gradient(145deg,#0c4a6e,#0284c7,#38bdf8)">
+                        <div class="text-center"><div class="text-[8px] opacity-80">گزارش عملکرد روزانه</div><div class="text-[13px] font-black mt-1">همراهِ یار</div><div class="text-[7px] mt-1" style="color:#fef08a">گزارش اختصاصی: نام شما</div></div>
+                        <div class="rounded-lg p-2 h-[48%] flex flex-col justify-end" style="background:#e0f2fe"><div class="text-[7px] text-slate-500 mb-2">روند پیشرفت</div><svg viewBox="0 0 100 45" class="w-full h-full"><path d="M2 38 Q20 30 32 34 T58 20 T98 5 L98 45 L2 45Z" fill="#0369a1" opacity=".2"/><path d="M2 38 Q20 30 32 34 T58 20 T98 5" fill="none" stroke="#0369a1" stroke-width="3"/></svg></div>
+                        <div class="rounded-lg bg-white/15 p-2 text-center text-[7px]">سبک و پرانرژی ✨</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 mt-2"><span class="text-xs font-extrabold text-slate-800 dark:text-white">آبی آسمانی</span><span class="jpeg-template-check hidden text-emerald-600 font-black">✓</span></div>
+                    <p class="text-[10px] text-slate-500 mt-1">سبک و پرانرژی</p>
+                </button>
+                <button type="button" data-jpeg-template="violet" onclick="selectJpegTemplate('violet')" class="jpeg-template-option text-right rounded-2xl border-2 border-transparent p-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <div class="template-preview rounded-xl overflow-hidden aspect-[4/5] p-2 flex flex-col justify-between text-white" style="background:linear-gradient(145deg,#3b0764,#6d28d9,#a78bfa)">
+                        <div class="text-center"><div class="text-[8px] opacity-80">گزارش عملکرد روزانه</div><div class="text-[13px] font-black mt-1">همراهِ یار</div><div class="text-[7px] mt-1" style="color:#fde68a">گزارش اختصاصی: نام شما</div></div>
+                        <div class="rounded-lg p-2 h-[48%] flex flex-col justify-end" style="background:#ede9fe"><div class="text-[7px] text-slate-500 mb-2">روند پیشرفت</div><svg viewBox="0 0 100 45" class="w-full h-full"><path d="M2 38 Q20 30 32 34 T58 20 T98 5 L98 45 L2 45Z" fill="#7c3aed" opacity=".2"/><path d="M2 38 Q20 30 32 34 T58 20 T98 5" fill="none" stroke="#7c3aed" stroke-width="3"/></svg></div>
+                        <div class="rounded-lg bg-white/15 p-2 text-center text-[7px]">آرام و الهام‌بخش ✨</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 mt-2"><span class="text-xs font-extrabold text-slate-800 dark:text-white">بنفش خیال</span><span class="jpeg-template-check hidden text-emerald-600 font-black">✓</span></div>
+                    <p class="text-[10px] text-slate-500 mt-1">آرام و الهام‌بخش</p>
+                </button>
+                <button type="button" data-jpeg-template="ruby" onclick="selectJpegTemplate('ruby')" class="jpeg-template-option text-right rounded-2xl border-2 border-transparent p-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <div class="template-preview rounded-xl overflow-hidden aspect-[4/5] p-2 flex flex-col justify-between text-white" style="background:linear-gradient(145deg,#450a0a,#991b1b,#e11d48)">
+                        <div class="text-center"><div class="text-[8px] opacity-80">گزارش عملکرد روزانه</div><div class="text-[13px] font-black mt-1">همراهِ یار</div><div class="text-[7px] mt-1" style="color:#fef3c7">گزارش اختصاصی: نام شما</div></div>
+                        <div class="rounded-lg p-2 h-[48%] flex flex-col justify-end" style="background:#ffe4e6"><div class="text-[7px] text-slate-500 mb-2">روند پیشرفت</div><svg viewBox="0 0 100 45" class="w-full h-full"><path d="M2 38 Q20 30 32 34 T58 20 T98 5 L98 45 L2 45Z" fill="#e11d48" opacity=".2"/><path d="M2 38 Q20 30 32 34 T58 20 T98 5" fill="none" stroke="#e11d48" stroke-width="3"/></svg></div>
+                        <div class="rounded-lg bg-white/15 p-2 text-center text-[7px]">گرم و باشکوه ✨</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 mt-2"><span class="text-xs font-extrabold text-slate-800 dark:text-white">یاقوتی فاخر</span><span class="jpeg-template-check hidden text-emerald-600 font-black">✓</span></div>
+                    <p class="text-[10px] text-slate-500 mt-1">گرم و باشکوه</p>
+                </button>
+                <button type="button" data-jpeg-template="olive" onclick="selectJpegTemplate('olive')" class="jpeg-template-option text-right rounded-2xl border-2 border-transparent p-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <div class="template-preview rounded-xl overflow-hidden aspect-[4/5] p-2 flex flex-col justify-between text-white" style="background:linear-gradient(145deg,#365314,#4d7c0f,#a3a34b)">
+                        <div class="text-center"><div class="text-[8px] opacity-80">گزارش عملکرد روزانه</div><div class="text-[13px] font-black mt-1">همراهِ یار</div><div class="text-[7px] mt-1" style="color:#fef9c3">گزارش اختصاصی: نام شما</div></div>
+                        <div class="rounded-lg p-2 h-[48%] flex flex-col justify-end" style="background:#ecfccb"><div class="text-[7px] text-slate-500 mb-2">روند پیشرفت</div><svg viewBox="0 0 100 45" class="w-full h-full"><path d="M2 38 Q20 30 32 34 T58 20 T98 5 L98 45 L2 45Z" fill="#65a30d" opacity=".2"/><path d="M2 38 Q20 30 32 34 T58 20 T98 5" fill="none" stroke="#65a30d" stroke-width="3"/></svg></div>
+                        <div class="rounded-lg bg-white/15 p-2 text-center text-[7px]">الهام‌گرفته از طبیعت ✨</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 mt-2"><span class="text-xs font-extrabold text-slate-800 dark:text-white">زیتونی طبیعی</span><span class="jpeg-template-check hidden text-emerald-600 font-black">✓</span></div>
+                    <p class="text-[10px] text-slate-500 mt-1">الهام‌گرفته از طبیعت</p>
+                </button>
+                <button type="button" data-jpeg-template="sand" onclick="selectJpegTemplate('sand')" class="jpeg-template-option text-right rounded-2xl border-2 border-transparent p-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <div class="template-preview rounded-xl overflow-hidden aspect-[4/5] p-2 flex flex-col justify-between text-white" style="background:linear-gradient(145deg,#57534e,#a8a29e,#d6d3d1)">
+                        <div class="text-center"><div class="text-[8px] opacity-80">گزارش عملکرد روزانه</div><div class="text-[13px] font-black mt-1">همراهِ یار</div><div class="text-[7px] mt-1" style="color:#fef3c7">گزارش اختصاصی: نام شما</div></div>
+                        <div class="rounded-lg p-2 h-[48%] flex flex-col justify-end" style="background:#fafaf9"><div class="text-[7px] text-slate-500 mb-2">روند پیشرفت</div><svg viewBox="0 0 100 45" class="w-full h-full"><path d="M2 38 Q20 30 32 34 T58 20 T98 5 L98 45 L2 45Z" fill="#78716c" opacity=".2"/><path d="M2 38 Q20 30 32 34 T58 20 T98 5" fill="none" stroke="#78716c" stroke-width="3"/></svg></div>
+                        <div class="rounded-lg bg-white/15 p-2 text-center text-[7px]">ساده و خلوت ✨</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 mt-2"><span class="text-xs font-extrabold text-slate-800 dark:text-white">مینیمال خاکی</span><span class="jpeg-template-check hidden text-emerald-600 font-black">✓</span></div>
+                    <p class="text-[10px] text-slate-500 mt-1">ساده و خلوت</p>
+                </button>
+                <button type="button" data-jpeg-template="lapis" onclick="selectJpegTemplate('lapis')" class="jpeg-template-option text-right rounded-2xl border-2 border-transparent p-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <div class="template-preview rounded-xl overflow-hidden aspect-[4/5] p-2 flex flex-col justify-between text-white" style="background:linear-gradient(145deg,#172554,#1d4ed8,#0e7490)">
+                        <div class="text-center"><div class="text-[8px] opacity-80">گزارش عملکرد روزانه</div><div class="text-[13px] font-black mt-1">همراهِ یار</div><div class="text-[7px] mt-1" style="color:#fde68a">گزارش اختصاصی: نام شما</div></div>
+                        <div class="rounded-lg p-2 h-[48%] flex flex-col justify-end" style="background:#dbeafe"><div class="text-[7px] text-slate-500 mb-2">روند پیشرفت</div><svg viewBox="0 0 100 45" class="w-full h-full"><path d="M2 38 Q20 30 32 34 T58 20 T98 5 L98 45 L2 45Z" fill="#2563eb" opacity=".2"/><path d="M2 38 Q20 30 32 34 T58 20 T98 5" fill="none" stroke="#2563eb" stroke-width="3"/></svg></div>
+                        <div class="rounded-lg bg-white/15 p-2 text-center text-[7px]">اصیل و هنری ✨</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 mt-2"><span class="text-xs font-extrabold text-slate-800 dark:text-white">لاجوردی ایرانی</span><span class="jpeg-template-check hidden text-emerald-600 font-black">✓</span></div>
+                    <p class="text-[10px] text-slate-500 mt-1">اصیل و هنری</p>
+                </button>
+                <button type="button" data-jpeg-template="sunrise" onclick="selectJpegTemplate('sunrise')" class="jpeg-template-option text-right rounded-2xl border-2 border-transparent p-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <div class="template-preview rounded-xl overflow-hidden aspect-[4/5] p-2 flex flex-col justify-between text-white" style="background:linear-gradient(145deg,#7c2d12,#ea580c,#fbbf24)">
+                        <div class="text-center"><div class="text-[8px] opacity-80">گزارش عملکرد روزانه</div><div class="text-[13px] font-black mt-1">همراهِ یار</div><div class="text-[7px] mt-1" style="color:#fef3c7">گزارش اختصاصی: نام شما</div></div>
+                        <div class="rounded-lg p-2 h-[48%] flex flex-col justify-end" style="background:#ffedd5"><div class="text-[7px] text-slate-500 mb-2">روند پیشرفت</div><svg viewBox="0 0 100 45" class="w-full h-full"><path d="M2 38 Q20 30 32 34 T58 20 T98 5 L98 45 L2 45Z" fill="#ea580c" opacity=".2"/><path d="M2 38 Q20 30 32 34 T58 20 T98 5" fill="none" stroke="#ea580c" stroke-width="3"/></svg></div>
+                        <div class="rounded-lg bg-white/15 p-2 text-center text-[7px]">گرم و امیدبخش ✨</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 mt-2"><span class="text-xs font-extrabold text-slate-800 dark:text-white">طلوع امید</span><span class="jpeg-template-check hidden text-emerald-600 font-black">✓</span></div>
+                    <p class="text-[10px] text-slate-500 mt-1">گرم و امیدبخش</p>
+                </button>
+                <button type="button" data-jpeg-template="silver" onclick="selectJpegTemplate('silver')" class="jpeg-template-option text-right rounded-2xl border-2 border-transparent p-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <div class="template-preview rounded-xl overflow-hidden aspect-[4/5] p-2 flex flex-col justify-between text-white" style="background:linear-gradient(145deg,#18181b,#3f3f46,#71717a)">
+                        <div class="text-center"><div class="text-[8px] opacity-80">گزارش عملکرد روزانه</div><div class="text-[13px] font-black mt-1">همراهِ یار</div><div class="text-[7px] mt-1" style="color:#fafafa">گزارش اختصاصی: نام شما</div></div>
+                        <div class="rounded-lg p-2 h-[48%] flex flex-col justify-end" style="background:#f4f4f5"><div class="text-[7px] text-slate-500 mb-2">روند پیشرفت</div><svg viewBox="0 0 100 45" class="w-full h-full"><path d="M2 38 Q20 30 32 34 T58 20 T98 5 L98 45 L2 45Z" fill="#71717a" opacity=".2"/><path d="M2 38 Q20 30 32 34 T58 20 T98 5" fill="none" stroke="#71717a" stroke-width="3"/></svg></div>
+                        <div class="rounded-lg bg-white/15 p-2 text-center text-[7px]">مدرن و رسمی ✨</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 mt-2"><span class="text-xs font-extrabold text-slate-800 dark:text-white">مشکی و نقره‌ای</span><span class="jpeg-template-check hidden text-emerald-600 font-black">✓</span></div>
+                    <p class="text-[10px] text-slate-500 mt-1">مدرن و رسمی</p>
+                </button>
+                <button type="button" data-jpeg-template="pinkwhite" onclick="selectJpegTemplate('pinkwhite')" class="jpeg-template-option text-right rounded-2xl border-2 border-transparent p-2 hover:bg-pink-50 dark:hover:bg-pink-950/20">
+                    <div class="template-preview rounded-xl overflow-hidden aspect-[4/5] p-2 flex flex-col justify-between" style="background:linear-gradient(145deg,#fff1f2,#ffffff,#fce7f3);color:#9d174d;border:1px solid #fbcfe8">
+                        <div class="text-center"><div class="text-[8px]" style="color:#be185d">گزارش عملکرد روزانه</div><div class="text-[13px] font-black mt-1">همراهِ یار</div><div class="text-[7px] mt-1" style="color:#db2777">گزارش اختصاصی: نام شما</div></div>
+                        <div class="rounded-lg p-2 h-[48%] flex flex-col justify-end shadow-sm" style="background:rgba(255,255,255,.92);border:1px solid #fbcfe8"><div class="text-[7px] mb-2" style="color:#9d174d">روند پیشرفت</div><svg viewBox="0 0 100 45" class="w-full h-full"><path d="M2 38 Q20 30 32 34 T58 20 T98 5 L98 45 L2 45Z" fill="#f9a8d4" opacity=".35"/><path d="M2 38 Q20 30 32 34 T58 20 T98 5" fill="none" stroke="#ec4899" stroke-width="3"/></svg></div>
+                        <div class="rounded-lg p-2 text-center text-[7px]" style="background:rgba(244,114,182,.13);color:#9d174d">لطافتِ صورتی، روشنیِ سفید 🌸</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 mt-2"><span class="text-xs font-extrabold text-slate-800 dark:text-white">صورتی ملیح و سفید</span><span class="jpeg-template-check hidden text-emerald-600 font-black">✓</span></div>
+                    <p class="text-[10px] text-slate-500 mt-1">روشن، لطیف و دلنشین</p>
+                </button>
+            </div>
+            <div class="flex items-center justify-between gap-3 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <p id="jpegTemplateSelectedHint" class="text-xs text-slate-500 dark:text-slate-400">قالب انتخاب‌شده: زمردی کلاسیک</p>
+                <button type="button" onclick="closeJpegTemplatePicker()" class="px-5 py-2.5 rounded-xl bg-gradient-to-l from-emerald-600 to-teal-600 text-white text-xs font-extrabold shadow-md">تأیید انتخاب</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- هدر بالای صفحه -->
+    <header class="sticky top-0 z-30 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 px-4 py-3 shadow-sm">
+        <div class="max-w-2xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center text-white shadow-md shadow-emerald-600/20">
+                    <!-- آیکون هلال و ستاره / جوانه معنوی -->
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-extrabold text-emerald-800 dark:text-emerald-400 tracking-tight leading-tight">
+                        همراهِ یار
+                    </h1>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                        چک‌لیست ارزیابی روزانه مهدوی
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+
+
+                <!-- دکمه تغییر حالت شب / روز -->
+                <button onclick="toggleDarkMode()" aria-label="تغییر تم" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-slate-700 transition">
+                    <svg id="sunIcon" class="w-5 h-5 hidden dark:block text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    <svg id="moonIcon" class="w-5 h-5 block dark:hidden text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- بدنه اصلی محتوا -->
+    <main class="max-w-2xl mx-auto px-4 pt-4 space-y-5">
+
+        <!-- بنر جملات انگیزشی مهدوی (ثابت در بالای تب‌ها) -->
+        <section class="relative overflow-hidden rounded-3xl bg-gradient-to-l from-emerald-800 via-emerald-700 to-teal-700 text-white p-4 sm:p-5 shadow-lg shadow-emerald-900/15 islamic-pattern">
+            <div class="flex items-start justify-between gap-3">
+                <div class="space-y-1.5 flex-1">
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-[11px] font-semibold text-emerald-100">
+                        <span>✨ زمزمه انتظار</span>
+                    </div>
+                    <p id="dailyQuoteText" class="text-sm sm:text-base font-medium leading-relaxed text-white/95">
+                        «اللَّهُمَّ اجْعَلْنِي مِنْ أَنْصَارِهِ وَأَعْوَانِهِ وَالذَّابِّينَ عَنْهُ...»
+                    </p>
+                    <p id="dailyQuoteSource" class="text-xs text-emerald-200/90 font-normal">
+                        فرازی از دعای عهد
+                    </p>
+                </div>
+                <button onclick="nextQuote()" title="جمله بعدی" class="shrink-0 p-2.5 rounded-2xl bg-white/15 hover:bg-white/25 active:scale-95 transition text-white" aria-label="جمله انگیزشی بعدی">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================== تب ۱: چک‌لیست روزانه ==================== -->
+        <div id="tab-checklist" class="tab-content space-y-5">
+
+            <!-- انتخابگر تاریخ و خلاصه وضعیت روز -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-sm border border-slate-200/70 dark:border-slate-800 space-y-4">
+                <!-- نوار انتخاب تاریخ -->
+                <div class="flex items-center justify-between gap-2 bg-slate-100/80 dark:bg-slate-800/80 p-1.5 rounded-2xl">
+                    <button onclick="changeDateOffset(-1)" class="p-2.5 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-sm hover:text-emerald-600 active:scale-95 transition" title="روز قبل">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+
+                    <div class="relative flex flex-col items-center text-center">
+                        <div class="flex items-center gap-2">
+                            <span id="selectedDateBadge" class="px-2 py-0.5 rounded-md bg-emerald-600 text-white text-[10px] font-bold">امروز</span>
+                            <span id="persianDateDisplay" class="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">در حال بارگذاری...</span>
+                        </div>
+                        <button type="button" id="persianCalendarToggle" onclick="togglePersianCalendar()" class="mt-1 inline-flex items-center gap-1 text-[11px] text-emerald-700 dark:text-emerald-400 hover:underline">
+                            <span>🗓️ انتخاب از تقویم شمسی</span>
+                            <span aria-hidden="true">⌄</span>
+                        </button>
+                        <div id="persianCalendar" class="hidden absolute z-40 mt-2 left-1/2 -translate-x-1/2 w-[min(330px,calc(100vw-48px))] rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 shadow-xl text-slate-800 dark:text-slate-100" dir="rtl">
+                            <div class="flex items-center justify-between mb-3">
+                                <button type="button" onclick="changePersianCalendarMonth(1)" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800" aria-label="ماه بعد">›</button>
+                                <strong id="persianCalendarTitle" class="text-sm"></strong>
+                                <button type="button" onclick="changePersianCalendarMonth(-1)" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800" aria-label="ماه قبل">‹</button>
+                            </div>
+                            <div class="grid grid-cols-7 gap-1 text-center text-[10px] text-slate-500 mb-1">
+                                <span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span>
+                            </div>
+                            <div id="persianCalendarDays" class="grid grid-cols-7 gap-1 text-center"></div>
+                        </div>
+                    </div>
+
+                    <button id="nextDayBtn" onclick="changeDateOffset(1)" class="p-2.5 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-sm hover:text-emerald-600 active:scale-95 transition disabled:opacity-40" title="روز بعد">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                </div>
+
+                <!-- کارت نمره توصیفی لحظه‌ای -->
+                <div id="scoreCard" class="rounded-2xl p-4 bg-gradient-to-br from-slate-50 to-emerald-50/60 dark:from-slate-800/80 dark:to-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/40 transition-all">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div id="gradeEmoji" class="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center text-3xl border border-slate-100 dark:border-slate-700">
+                                ❌
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">ارزیابی عملکرد این روز:</div>
+                                <div id="gradeTitle" class="text-xl font-black text-slate-800 dark:text-white mt-0.5">
+                                    خیلی ضعیف
+                                </div>
+                                <div id="gradeSubtitle" class="text-xs text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">
+                                    ۰ از ۱۰ اقدام انجام شده
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- دایره درصد پیشرفت -->
+                        <div class="relative w-16 h-16 flex items-center justify-center shrink-0">
+                            <svg class="w-16 h-16 -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-slate-200 dark:text-slate-700" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path id="progressRing" class="text-emerald-600 transition-all duration-500" stroke-dasharray="0, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <span id="progressPercentText" class="absolute text-xs font-extrabold text-slate-700 dark:text-slate-200">۰٪</span>
+                        </div>
+                    </div>
+
+                    <!-- راهنمای سریع فرمول نمره‌دهی -->
+                    <div class="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-slate-700/60 flex flex-wrap items-center justify-between gap-1 text-[10px] text-slate-500 dark:text-slate-400">
+                        <span>🏆 ۹-۱۰: عالی</span>
+                        <span>🌟 ۷-۸: خیلی خوب</span>
+                        <span>✅ ۵-۶: خوب</span>
+                        <span>➖ ۳-۴: متوسط</span>
+                        <span>⚠️ ۱-۲: ضعیف</span>
+                        <span>❌ ۰: خیلی ضعیف</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- کانتینر دسته‌بندی‌ها و آیتم‌های چک‌لیست -->
+            <div id="checklistCategoriesContainer" class="space-y-4">
+                <!-- به صورت پویا توسط جاوااسکریپت پر می‌شود -->
+            </div>
+
+            <!-- تذکر اقدام یک‌باره: آهنگ پیشواز مهدوی -->
+            <div class="rounded-3xl p-4 bg-amber-50/90 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/50 flex items-center justify-between gap-3">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 text-lg">
+                        📌
+                    </div>
+                    <div>
+                        <h4 class="text-xs sm:text-sm font-bold text-amber-900 dark:text-amber-300">
+                            اقدام یک‌باره: انتخاب آهنگ پیشواز مهدوی برای گوشی
+                        </h4>
+                        <p class="text-xs text-amber-800/80 dark:text-amber-400/80 mt-0.5 leading-relaxed">
+                            اگر هنوز آهنگ پیشواز مهدوی را برای خط خود فعال نکرده‌اید، همین امروز انجامش دهید و تیک آن را بزنید.
+                        </p>
+                    </div>
+                </div>
+                <button id="pishvazToggleBtn" onclick="togglePishvaz()" class="shrink-0 px-3.5 py-2 rounded-2xl text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+                    <!-- وضعیت توسط JS تنظیم می‌شود -->
+                </button>
+            </div>
+
+            <!-- یادداشت روزانه / دل‌نوشته ارزیابی شبانه -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-sm border border-slate-200/70 dark:border-slate-800 space-y-2">
+                <label for="dailyNoteInput" class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+                    <span>📝 یادداشت کوتاه ارزیابی شبانه (اختیاری)</span>
+                    <span id="noteSavedIndicator" class="text-[11px] text-emerald-600 dark:text-emerald-400 opacity-0 transition-opacity">ذخیره شد ✓</span>
+                </label>
+                <textarea id="dailyNoteInput" rows="2" oninput="saveDailyNote(this.value)" placeholder="مثلاً: امروز توفیق نماز شب داشتم و یک هدیه کوچک به همکارم دادم..." class="w-full rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-3 text-xs sm:text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 resize-none"></textarea>
+            </div>
+        </div>
+
+        <!-- ==================== تب ۲: نمودار روند پیشرفت و خروجی JPEG ==================== -->
+        <div id="tab-analytics" class="tab-content hidden space-y-5">
+
+            <!-- کارت کنترل‌های نمودار -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-sm border border-slate-200/70 dark:border-slate-800 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <h2 class="text-base font-extrabold text-slate-800 dark:text-white flex items-center gap-2">
+                            <span>📈 نمودار روند عملکرد روزانه</span>
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            نوسان و رشد معنوی خود را در طول روزها مشاهده کنید
+                        </p>
+                    </div>
+
+                    <!-- انتخاب قالب و مدیریت مشخصات خروجی -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" onclick="openJpegTemplatePicker()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 transition flex items-center gap-2">
+                            <span>🎨 انتخاب قالب خروجی</span>
+                            <span id="jpegTemplateCurrentLabel" class="text-emerald-700 dark:text-emerald-400">زمردی کلاسیک</span>
+                        </button>
+                        <select id="jpegTemplateSelect" aria-label="قالب خروجی JPEG" class="hidden">
+                            <option value="classic">زمردی کلاسیک</option>
+                            <option value="midnight">سرمه‌ای و طلایی</option>
+                            <option value="rose">رزگلد لطیف</option>
+                            <option value="ivory">کاغذی و فیروزه‌ای</option>
+                            <option value="sky">آبی آسمانی</option>
+                            <option value="violet">بنفش خیال</option>
+                            <option value="ruby">یاقوتی فاخر</option>
+                            <option value="olive">زیتونی طبیعی</option>
+                            <option value="sand">مینیمال خاکی</option>
+                            <option value="lapis">لاجوردی ایرانی</option>
+                            <option value="sunrise">طلوع امید</option>
+                            <option value="silver">مشکی و نقره‌ای</option>
+                            <option value="pinkwhite">صورتی ملیح و سفید</option>
+                        </select>
+                        <button onclick="editUserProfile()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 transition">✏️ ویرایش نام</button>
+                    </div>
+
+                    <!-- دکمه خروجی گرافیکی JPEG -->
+                    <button onclick="exportChartAsJPEG()" class="px-3.5 py-2 rounded-2xl bg-gradient-to-l from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 flex items-center gap-1.5 active:scale-95 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span>خروجی تصویری JPEG</span>
+                    </button>
+                </div>
+
+                <!-- انتخاب بازه زمانی و نوع نمودار -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <!-- بازه زمانی -->
+                    <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl flex text-xs font-bold">
+                        <button onclick="setChartRange(7)" data-range="7" class="range-btn flex-1 py-2 rounded-xl transition bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm">۷ روزه</button>
+                        <button onclick="setChartRange(14)" data-range="14" class="range-btn flex-1 py-2 rounded-xl transition text-slate-600 dark:text-slate-400">۱۴ روزه</button>
+                        <button onclick="setChartRange(30)" data-range="30" class="range-btn flex-1 py-2 rounded-xl transition text-slate-600 dark:text-slate-400">۳۰ روزه</button>
+                    </div>
+
+                    <!-- نوع نمودار -->
+                    <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl flex text-xs font-bold">
+                        <button onclick="setChartType('line')" data-type="line" class="chart-type-btn flex-1 py-2 rounded-xl transition bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm">منحنی روند</button>
+                        <button onclick="setChartType('bar')" data-type="bar" class="chart-type-btn flex-1 py-2 rounded-xl transition text-slate-600 dark:text-slate-400">میله‌ای</button>
+                        <button onclick="setChartType('radar')" data-type="radar" class="chart-type-btn flex-1 py-2 rounded-xl transition text-slate-600 dark:text-slate-400">تعادل (راداری)</button>
+                        <button onclick="setChartType('heatmap')" data-type="heatmap" class="chart-type-btn flex-1 py-2 rounded-xl transition text-slate-600 dark:text-slate-400">تقویم رنگی</button>
+                    </div>
+                </div>
+
+                <!-- محل نمایش نمودار یا تقویم حرارتی -->
+                <div class="relative w-full h-72 sm:h-80 pt-2">
+                    <canvas id="progressChartCanvas"></canvas>
+                    <div id="heatmapContainer" class="hidden h-full overflow-y-auto p-2">
+                        <!-- تقویم حرارتی با JS پر می‌شود -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- کارت آمارهای خلاصه دوره -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-3.5 text-center border border-slate-200/70 dark:border-slate-800 shadow-sm">
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">میانگین وضعیت</div>
+                    <div id="statAvgGrade" class="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400 mt-1">-</div>
+                    <div id="statAvgPercent" class="text-[11px] text-slate-400 mt-0.5">۰٪</div>
+                </div>
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-3.5 text-center border border-slate-200/70 dark:border-slate-800 shadow-sm">
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">بهترین روز دوره</div>
+                    <div id="statBestDay" class="text-sm sm:text-base font-black text-amber-600 dark:text-amber-400 mt-1">-</div>
+                    <div id="statBestScore" class="text-[11px] text-slate-400 mt-0.5">-</div>
+                </div>
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-3.5 text-center border border-slate-200/70 dark:border-slate-800 shadow-sm">
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">روزهای ثبت‌شده</div>
+                    <div id="statActiveDays" class="text-sm sm:text-base font-black text-teal-600 dark:text-teal-400 mt-1">۰ روز</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">استمرار</div>
+                </div>
+            </div>
+
+            <!-- تاریخچه اخیر روزها -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-sm border border-slate-200/70 dark:border-slate-800 space-y-3">
+                <h3 class="text-sm font-extrabold text-slate-800 dark:text-white">🗓️ مرور سریع روزهای اخیر (برای ویرایش کلیک کنید)</h3>
+                <div id="recentHistoryList" class="space-y-2">
+                    <!-- با JS پر می‌شود -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== تب ۳: مدیریت و سفارشی‌سازی چک‌لیست‌ها ==================== -->
+        <div id="tab-manage" class="tab-content hidden space-y-5">
+
+            <!-- افزودن دسته یا آیتم جدید -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-sm border border-slate-200/70 dark:border-slate-800 space-y-4">
+                <div>
+                    <h2 class="text-base font-extrabold text-slate-800 dark:text-white">⚙️ شخصی‌سازی چک‌لیست‌ها</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        در کنار ۱۰ اقدام اصلی مهدوی، می‌توانید برنامه‌های شخصی یا دسته‌بندی‌های جدید خود را اضافه کنید.
+                    </p>
+                </div>
+
+                <!-- فرم افزودن آیتم جدید -->
+                <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 space-y-3">
+                    <h3 class="text-xs font-bold text-emerald-700 dark:text-emerald-400">➕ افزودن اقدام / وظیفه جدید</h3>
+                    <div class="space-y-2.5">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">انتخاب بخش / دسته‌بندی:</label>
+                            <select id="newItemCategorySelect" class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <!-- گزینه‌ها با JS پر می‌شوند -->
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">عنوان اقدام (مثلاً: مطالعه کتاب مهدوی):</label>
+                                <input type="text" id="newItemTitleInput" placeholder="عنوان کوتاه..." class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">توضیح یا ضابطه (اختیاری):</label>
+                                <input type="text" id="newItemDescInput" placeholder="مثلاً: حداقل ۱۰ صفحه در روز..." class="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+                        <button onclick="addNewChecklistItem()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition active:scale-[0.99]">
+                            افزودن به چک‌لیست روزانه
+                        </button>
+                    </div>
+                </div>
+
+                <!-- فرم افزودن دسته‌بندی/چک‌لیست جدید -->
+                <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 space-y-2.5">
+                    <h3 class="text-xs font-bold text-teal-700 dark:text-teal-400">📁 ساخت بخش / چک‌لیست جدید</h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="newCategoryTitleInput" placeholder="مثلاً: بخش سوم: برنامه‌های علمی و مهارتی" class="flex-1 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <button onclick="addNewCategory()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shrink-0 transition">
+                            ایجاد بخش
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- لیست آیتم‌های موجود برای مدیریت (فعال/غیرفعال/حذف) -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-sm border border-slate-200/70 dark:border-slate-800 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-extrabold text-slate-800 dark:text-white">📋 مدیریت موارد چک‌لیست</h3>
+                    <button onclick="confirmResetDefaults()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline">
+                        بازگردانی به لیست پیش‌فرض
+                    </button>
+                </div>
+                <div id="manageItemsContainer" class="space-y-4">
+                    <!-- با JS پر می‌شود -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== تب ۴: پشتیبان‌گیری و انتقال دیتابیس ==================== -->
+        <div id="tab-backup" class="tab-content hidden space-y-5">
+
+            <!-- بخش پشتیبان‌گیری و انتقال دیتابیس -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-sm border border-slate-200/70 dark:border-slate-800 space-y-4">
+                <div class="flex items-start gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-extrabold text-slate-800 dark:text-white">💾 پشتیبان‌گیری و انتقال به گوشی دیگر</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                            تمامی سوابق تیک‌ها، نمودارها و چک‌لیست‌های سفارشی شما در حافظه امن دستگاه ذخیره می‌شود. برای انتقال به گوشی جدید یا حفظ دائمی اطلاعات، فایل پشتیبان تهیه کنید.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <!-- دکمه دانلود فایل پشتیبان -->
+                    <button onclick="exportDatabaseJSON()" class="p-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 text-xs sm:text-sm font-bold shadow-md shadow-emerald-600/20 active:scale-98 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        <span>دانلود فایل پشتیبان (Backup)</span>
+                    </button>
+
+                    <!-- دکمه بازیابی فایل پشتیبان -->
+                    <label class="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 flex items-center justify-center gap-2 text-xs sm:text-sm font-bold cursor-pointer active:scale-98 transition">
+                        <svg class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <span>بازگردانی اطلاعات (Restore)</span>
+                        <input type="file" id="restoreFileInput" accept=".json,application/json" onchange="importDatabaseJSON(event)" class="hidden">
+                    </label>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- نوار ناوبری پایین صفحه (Mobile Bottom Navigation) -->
+    <nav class="fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 px-2 py-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
+        <div class="max-w-2xl mx-auto grid grid-cols-4 gap-1">
+            <button onclick="switchTab('checklist')" data-tab="checklist" class="nav-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 transition">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="text-[11px] font-bold">چک‌لیست</span>
+            </button>
+
+            <button onclick="switchTab('analytics')" data-tab="analytics" class="nav-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+                <span class="text-[11px] font-semibold">نمودار و روند</span>
+            </button>
+
+            <button onclick="switchTab('manage')" data-tab="manage" class="nav-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                <span class="text-[11px] font-semibold">آیتم‌ها</span>
+            </button>
+
+            <button onclick="switchTab('backup')" data-tab="backup" class="nav-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                <span class="text-[11px] font-semibold">پشتیبان‌گیری</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- پنجره پیام سفارشی (جایگزین alert و confirm) -->
+    <div id="customModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4 transform transition-all">
+            <div class="flex items-center gap-3">
+                <div id="modalIcon" class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl shrink-0">
+                    ✨
+                </div>
+                <h3 id="modalTitle" class="text-base font-extrabold text-slate-800 dark:text-white">پیام سیستم</h3>
+            </div>
+            <p id="modalMessage" class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed"></p>
+            <div id="modalActions" class="flex items-center justify-end gap-2 pt-2">
+                <!-- دکمه‌ها با JS پر می‌شوند -->
+            </div>
+        </div>
+    </div>
+
+    <!-- اعلان شناور (Toast) -->
+    <div id="toastNotification" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 transform -translate-y-2">
+        <div id="toastContent" class="px-4 py-2.5 rounded-2xl bg-slate-900/95 dark:bg-emerald-700 text-white text-xs font-bold shadow-xl flex items-center gap-2">
+            <span>✓</span>
+            <span id="toastText">عملیات انجام شد</span>
+        </div>
+    </div>
+
+    <!-- بوم مخفی برای تولید خروجی گرافیکی باکیفیت JPEG -->
+    <canvas id="jpegExportCanvas" width="1080" height="1350" class="hidden"></canvas>
+
+    <script>
+        /* ==========================================================================
+           ۱. داده‌های پیش‌فرض، جملات مهدوی و ساختار دیتابیس
+           ========================================================================== */
+        const DB_KEY = 'hamrah_yar_mahdavi_db_v1';
+
+        // جملات انگیزشی و معنوی مهدوی
+        const MAHDAVI_QUOTES = [
+            { text: "«اللَّهُمَّ اجْعَلْنِي مِنْ أَنْصَارِهِ وَأَعْوَانِهِ وَالذَّابِّينَ عَنْهُ وَالْمُسَارِعِينَ إِلَيْهِ فِي قَضَاءِ حَوَائِجِهِ»", source: "فرازی از دعای عهد" },
+            { text: "«أَيْنَ الْمُعَدُّ لِقَطْعِ دَابِرِ الظَّلَمَةِ... کجاست آن‌که برای ریشه‌کن کردن ستمگران آماده شده است؟»", source: "فرازی از دعای ندبه" },
+            { text: "«هر یک از شما باید کاری کند که او را به دوستی ما نزدیک‌تر سازد و از آن‌چه موجب ناخشنودی ماست دوری گزیند.»", source: "توقیع شریف حضرت ولی‌عصر (عج)" },
+            { text: "«سربازی امام زمان (عج) از همین کارهای کوچک روزمره که با نیت خالص انجام می‌شود آغاز می‌گردد.»", source: "نکته تربیتی منتظران" },
+            { text: "«اگر شیعیان ما به اندازه یک جرعه آب تشنه ظهور بودند، فرج ما به تأخیر نمی‌افتاد.»", source: "بیان نورانی اهل‌بیت (ع)" },
+            { text: "«برای تعجیل در فرج بسیار دعا کنید، که همانا فرج شما در گروِ همین دعاهاست.»", source: "توقیع شریف امام زمان (عج)" },
+            { text: "«سلام بر تو ای مولای من! امروز تمام کارهایم را به نیت خشنودی قلب نازنین تو آغاز می‌کنم.»", source: "عهد صبحگاهی منتظر" },
+            { text: "«ما از احوال شما آگاهیم و هیچ چیز از کارهای شما بر ما پوشیده نیست؛ ما شما را فراموش نکرده‌ایم.»", source: "توقیع شریف حضرت حجت (عج)" },
+            { text: "«منتظر واقعی کسی است که هر روز، قدمی برای بهتر شدن خود و جهان اطرافش برمی‌دارد.»", source: "انتظار یعنی حرکت" },
+            { text: "«آقا جان! حتی اگر چشمم به جمالتان روشن نیست، دلم را از یاد شما خالی نمی‌کنم.»", source: "رفیق روزهای پنهان" },
+            { text: "«امروز را با این نیت آغاز می‌کنم که رفتارم، لبخندم و کارهایم مایه خشنودی مولایم باشد.»", source: "صبح با یاد او" },
+            { text: "«خدایا! دل‌های ما را به نور معرفت و محبت ولیّ‌ات زنده نگه دار.»", source: "دعای همیشگی" },
+            { text: "«برای یاری امامم، ابتدا باید بر ضعف‌ها و ناپاکی‌های وجود خود غلبه کنم.»", source: "سربازی از خودسازی" },
+            { text: "«جهان هرقدر تاریک باشد، وعده الهی روشن است و امید به فرج خاموش نمی‌شود.»", source: "امید در روزهای سخت" },
+            { text: "«خدایا! ظهور مولایمان را نزدیک بگردان و ما را از یاران شایسته او قرار بده.»", source: "دعای فرج" },
+            { text: "«دوست داشتن امام زمان (عج) تنها یک احساس نیست؛ باید در مهربانی، صداقت و خدمت به دیگران دیده شود.»", source: "محبت در عمل" },
+            { text: "«شاید نتوانم جهان را تغییر دهم، اما می‌توانم از اصلاح رفتار خودم شروع کنم.»", source: "سهم من از ظهور" },
+            { text: "«مولای من! کمکم کن در خلوت و آشکار، به عهد بندگی و دوستی شما وفادار بمانم.»", source: "عهد با امام" },
+            { text: "«چه زیباست کار خیری انجام دهم، بی‌آنکه کسی بداند؛ فقط به نیت رضایت خدا و مولایم.»", source: "خدمت بی‌نام" },
+            { text: "«هر شب از خودم بپرسم: امروز چقدر شبیه یک منتظر واقعی زندگی کردم؟»", source: "قرار عاشقی" }
+        ];
+
+        // ساختار پیش‌فرض چک‌لیست دقیقاً مطابق متن کاربر
+        const DEFAULT_SCHEMA = {
+            categories: [
+                {
+                    id: 'cat_individual',
+                    title: 'بخش اول: اقدامات فردی و معنوی',
+                    icon: '🔹',
+                    color: 'emerald'
+                },
+                {
+                    id: 'cat_social',
+                    title: 'بخش دوم: اقدامات تبلیغی و اجتماعی',
+                    icon: '🔸',
+                    color: 'amber'
+                }
+            ],
+            items: [
+                // بخش اول: اقدامات فردی و معنوی
+                {
+                    id: 'item_1',
+                    categoryId: 'cat_individual',
+                    title: '۱. نماز شب',
+                    description: 'بیدار شدن نیم ساعت زودتر از اذان صبح (شروع حتی با یک رکعت وتر)',
+                    active: true,
+                    isDefault: true
+                },
+                {
+                    id: 'item_2',
+                    categoryId: 'cat_individual',
+                    title: '۲. دعای عهد',
+                    description: 'قرائت بلافاصله بعد از نماز صبح',
+                    active: true,
+                    isDefault: true
+                },
+                {
+                    id: 'item_3',
+                    categoryId: 'cat_individual',
+                    title: '۳. زیارت آل‌یاسین',
+                    description: 'قرائت بعد از نماز صبح',
+                    active: true,
+                    isDefault: true
+                },
+                {
+                    id: 'item_4',
+                    categoryId: 'cat_individual',
+                    title: '۴. تلاوت قرآن',
+                    description: 'خواندن حداقل یک صفحه در روز',
+                    active: true,
+                    isDefault: true
+                },
+                {
+                    id: 'item_5',
+                    categoryId: 'cat_individual',
+                    title: '۵. گفت‌وگوی صمیمانه',
+                    description: '۲ تا ۵ دقیقه درد دل و صحبت خودمانی با امام زمان (عج) در اول صبح',
+                    active: true,
+                    isDefault: true
+                },
+                {
+                    id: 'item_6',
+                    categoryId: 'cat_individual',
+                    title: '۶. حرز و صدقه',
+                    description: 'همراه داشتن حرز (مثل حرز امام جواد ع) و پرداخت صدقه روزانه',
+                    active: true,
+                    isDefault: true
+                },
+                // بخش دوم: اقدامات تبلیغی و اجتماعی
+                {
+                    id: 'item_7',
+                    categoryId: 'cat_social',
+                    title: '۷. پیامک مهدوی',
+                    description: 'ارسال روزانه حداقل یک پیامک برای مخاطبین (پیشنهاد: ساعت ۱۴)',
+                    active: true,
+                    isDefault: true
+                },
+                {
+                    id: 'item_8',
+                    categoryId: 'cat_social',
+                    title: '۸. کارهای نیت‌مند',
+                    description: 'انجام کارهای روزمره (درس، کار، کمک به دیگران) با نیت سربازی حضرت',
+                    active: true,
+                    isDefault: true
+                },
+                {
+                    id: 'item_9',
+                    categoryId: 'cat_social',
+                    title: '۹. هدیه و گفت‌وگو',
+                    description: 'دادن حداقل یک هدیه مهدوی در روز و باز کردن سر صحبت عاطفی درباره امام زمان (عج)',
+                    active: true,
+                    isDefault: true
+                },
+                {
+                    id: 'item_10',
+                    categoryId: 'cat_social',
+                    title: '۱۰. یارگیری و معرفی',
+                    description: 'تلاش برای جذب افراد مستعد و دعوت به جلسات و برنامه‌های مجموعه',
+                    active: true,
+                    isDefault: true
+                }
+            ]
+        };
+
+        // وضعیت سراسری اپلیکیشن
+        let appState = {
+            schema: JSON.parse(JSON.stringify(DEFAULT_SCHEMA)),
+            records: {}, // کلید: 'YYYY-MM-DD' -> { checkedIds: [], note: '', snapshotTotal: 10 }
+            pishvazDone: false,
+            darkMode: false
+        };
+
+        let selectedDateStr = getTodayISO();
+        let currentQuoteIndex = new Date().getDate() % MAHDAVI_QUOTES.length;
+        let currentChartRange = 7;
+        let currentChartType = 'line';
+        let chartInstance = null;
+
+        /* ==========================================================================
+           ۲. توابع کمکی تاریخ شمسی، اعداد فارسی و ذخیره‌سازی
+           ========================================================================== */
+        function toPersianDigits(str) {
+            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            return String(str).replace(/\d/g, d => persianDigits[d]);
+        }
+
+        function getTodayISO() {
+            const now = new Date();
+            const offset = now.getTimezoneOffset();
+            const local = new Date(now.getTime() - (offset * 60 * 1000));
+            return local.toISOString().split('T')[0];
+        }
+
+        function addDaysToISO(isoStr, days) {
+            const parts = isoStr.split('-').map(Number);
+            const date = new Date(parts[0], parts[1] - 1, parts[2]);
+            date.setDate(date.getDate() + days);
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        // تبدیل تاریخ میلادی ISO به تاریخ شمسی خوانا با استفاده از Intl.DateTimeFormat مرورگر
+        function formatPersianDate(isoStr, short = false) {
+            try {
+                const parts = isoStr.split('-').map(Number);
+                const date = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+                if (short) {
+                    return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+                        month: 'short',
+                        day: 'numeric'
+                    }).format(date);
+                }
+                return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }).format(date);
+            } catch (e) {
+                return toPersianDigits(isoStr);
+            }
+        }
+
+        function loadDatabase() {
+            try {
+                const raw = localStorage.getItem(DB_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed.schema && parsed.schema.categories && parsed.schema.items) {
+                        appState.schema = parsed.schema;
+                    }
+                    if (parsed.records) {
+                        appState.records = parsed.records;
+                    }
+                    appState.pishvazDone = Boolean(parsed.pishvazDone);
+                    appState.darkMode = Boolean(parsed.darkMode);
+                    appState.firstName = typeof parsed.firstName === 'string' ? parsed.firstName : '';
+                    appState.lastName = typeof parsed.lastName === 'string' ? parsed.lastName : '';
+                }
+            } catch (err) {
+                console.error('خطا در خواندن دیتابیس:', err);
+            }
+        }
+
+        function saveDatabase() {
+            try {
+                localStorage.setItem(DB_KEY, JSON.stringify(appState));
+            } catch (err) {
+                showToast('خطا در ذخیره‌سازی اطلاعات در حافظه!', true);
+            }
+        }
+
+        function showUserProfileEditor() {
+            const overlay = document.getElementById('profileSetupOverlay');
+            document.getElementById('profileFirstName').value = appState.firstName || '';
+            document.getElementById('profileLastName').value = appState.lastName || '';
+            const submitButton = document.querySelector('#profileSetupForm button[type="submit"]');
+            submitButton.textContent = 'ذخیره مشخصات';
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        }
+
+        function editUserProfile() {
+            showUserProfileEditor();
+        }
+
+        function setupUserProfile() {
+            const overlay = document.getElementById('profileSetupOverlay');
+            const form = document.getElementById('profileSetupForm');
+
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const firstName = document.getElementById('profileFirstName').value.trim();
+                const lastName = document.getElementById('profileLastName').value.trim();
+
+                if (!firstName || !lastName) {
+                    showToast('لطفاً نام و نام خانوادگی را کامل وارد کنید', true);
+                    return;
+                }
+
+                const isFirstEntry = !(appState.firstName && appState.lastName);
+                appState.firstName = firstName;
+                appState.lastName = lastName;
+                saveDatabase();
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+                document.querySelector('#profileSetupForm button[type="submit"]').textContent = 'ورود به برنامه';
+                showToast(isFirstEntry ? `خوش آمدید ${firstName} ${lastName} 🌿` : 'مشخصات شما با موفقیت به‌روزرسانی شد ✓');
+            });
+
+            if (!(appState.firstName && appState.lastName)) {
+                showUserProfileEditor();
+            }
+        }
+
+        /* ==========================================================================
+           ۳. فرمول نمره‌دهی دقیق مطابق ضوابط کاربر
+           ========================================================================== */
+        /**
+         * محاسبه نمره توصیفی بر اساس تعداد تیک‌ها و کل آیتم‌های فعال
+         * در حالت استاندارد ۱۰ آیتم:
+         * ۹ تا ۱۰: عالی 🏆
+         * ۷ تا ۸: خیلی خوب 🌟
+         * ۵ تا ۶: خوب ✅
+         * ۳ تا ۴: متوسط ➖
+         * ۱ تا ۲: ضعیف ⚠️
+         * ۰: خیلی ضعیف ❌
+         * و اگر کاربر آیتم اضافه/کم کرد، به صورت متناسب مقیاس‌بندی می‌شود.
+         */
+        function evaluateScore(checkedCount, totalCount) {
+            if (totalCount <= 0 || checkedCount <= 0) {
+                return {
+                    level: 0,
+                    title: 'خیلی ضعیف',
+                    emoji: '❌',
+                    color: '#ef4444', // rose-500
+                    bgClass: 'border-rose-200 dark:border-rose-900/50',
+                    percent: 0
+                };
+            }
+
+            // معادل‌سازی در مقیاس ۱۰ تایی
+            const normalizedScore = totalCount === 10
+                ? checkedCount
+                : Math.round((checkedCount / totalCount) * 10);
+            const percent = Math.round((checkedCount / totalCount) * 100);
+
+            if (normalizedScore >= 9) {
+                return {
+                    level: 5,
+                    title: 'عالی',
+                    emoji: '🏆',
+                    color: '#059669', // emerald-600
+                    bgClass: 'border-emerald-300 dark:border-emerald-700',
+                    percent
+                };
+            } else if (normalizedScore >= 7) {
+                return {
+                    level: 4,
+                    title: 'خیلی خوب',
+                    emoji: '🌟',
+                    color: '#0d9488', // teal-600
+                    bgClass: 'border-teal-300 dark:border-teal-700',
+                    percent
+                };
+            } else if (normalizedScore >= 5) {
+                return {
+                    level: 3,
+                    title: 'خوب',
+                    emoji: '✅',
+                    color: '#2563eb', // blue-600
+                    bgClass: 'border-blue-200 dark:border-blue-800',
+                    percent
+                };
+            } else if (normalizedScore >= 3) {
+                return {
+                    level: 2,
+                    title: 'متوسط',
+                    emoji: '➖',
+                    color: '#d97706', // amber-600
+                    bgClass: 'border-amber-200 dark:border-amber-800',
+                    percent
+                };
+            } else {
+                return {
+                    level: 1,
+                    title: 'ضعیف',
+                    emoji: '⚠️',
+                    color: '#ea580c', // orange-600
+                    bgClass: 'border-orange-200 dark:border-orange-800',
+                    percent
+                };
+            }
+        }
+
+        function getDayStats(isoStr) {
+            const activeItems = appState.schema.items.filter(i => i.active);
+            const activeIds = new Set(activeItems.map(i => i.id));
+            const record = appState.records[isoStr];
+            const checkedIds = record && Array.isArray(record.checkedIds)
+                ? record.checkedIds.filter(id => activeIds.has(id))
+                : [];
+            const total = activeItems.length;
+            const checked = checkedIds.length;
+            const evaluation = evaluateScore(checked, total);
+            return {
+                checked,
+                total,
+                checkedIds,
+                note: record ? (record.note || '') : '',
+                hasRecord: Boolean(record && (checked > 0 || (record.note && record.note.trim() !== ''))),
+                evaluation
+            };
+        }
+
+        /* ==========================================================================
+           ۴. رندر رابط کاربری چک‌لیست روزانه
+           ========================================================================== */
+        function renderQuote() {
+            const q = MAHDAVI_QUOTES[currentQuoteIndex % MAHDAVI_QUOTES.length];
+            document.getElementById('dailyQuoteText').textContent = q.text;
+            document.getElementById('dailyQuoteSource').textContent = q.source;
+        }
+
+        function nextQuote() {
+            currentQuoteIndex = (currentQuoteIndex + 1) % MAHDAVI_QUOTES.length;
+            renderQuote();
+        }
+
+        function updateDateHeaderUI() {
+            const today = getTodayISO();
+            const yesterday = addDaysToISO(today, -1);
+            const badge = document.getElementById('selectedDateBadge');
+
+            if (selectedDateStr === today) {
+                badge.textContent = 'امروز';
+                badge.className = 'px-2.5 py-0.5 rounded-lg bg-emerald-600 text-white text-[11px] font-bold';
+            } else if (selectedDateStr === yesterday) {
+                badge.textContent = 'دیروز';
+                badge.className = 'px-2.5 py-0.5 rounded-lg bg-amber-500 text-white text-[11px] font-bold';
+            } else {
+                badge.textContent = 'ویرایش سابقه';
+                badge.className = 'px-2.5 py-0.5 rounded-lg bg-slate-600 text-white text-[11px] font-bold';
+            }
+
+            document.getElementById('persianDateDisplay').textContent = formatPersianDate(selectedDateStr);
+            renderPersianCalendar();
+            document.getElementById('nextDayBtn').disabled = (selectedDateStr >= today);
+        }
+
+        function changeDateOffset(offset) {
+            const next = addDaysToISO(selectedDateStr, offset);
+            const today = getTodayISO();
+            if (next > today) {
+                showToast('امکان ثبت چک‌لیست برای روزهای آینده وجود ندارد');
+                return;
+            }
+            selectedDateStr = next;
+            renderChecklistView();
+        }
+
+        // تقویم شمسی تعاملی؛ تاریخ‌های داخلی همچنان به‌صورت ISO میلادی ذخیره می‌شوند.
+        let persianCalendarViewDate = selectedDateStr;
+
+        function getPersianParts(date) {
+            const parts = new Intl.DateTimeFormat('en-US-u-ca-persian', {
+                year: 'numeric', month: 'numeric', day: 'numeric'
+            }).formatToParts(date);
+            const get = type => Number(parts.find(p => p.type === type).value);
+            return { year: get('year'), month: get('month'), day: get('day') };
+        }
+
+        function isoToLocalDate(iso) {
+            const [y, m, d] = iso.split('-').map(Number);
+            return new Date(y, m - 1, d, 12);
+        }
+
+        function localDateToISO(date) {
+            return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+        }
+
+        function findPersianMonthStart(viewDate) {
+            const target = getPersianParts(viewDate);
+            const probe = new Date(viewDate.getFullYear(), viewDate.getMonth(), viewDate.getDate(), 12);
+            for (let i = 0; i < 35; i++) {
+                const candidate = new Date(probe);
+                candidate.setDate(probe.getDate() - i);
+                const p = getPersianParts(candidate);
+                if (p.year === target.year && p.month === target.month && p.day === 1) return candidate;
+            }
+            return new Date(viewDate.getFullYear(), viewDate.getMonth(), 1, 12);
+        }
+
+        function togglePersianCalendar() {
+            const panel = document.getElementById('persianCalendar');
+            const opening = panel.classList.contains('hidden');
+            if (opening) persianCalendarViewDate = selectedDateStr;
+            panel.classList.toggle('hidden');
+            if (opening) renderPersianCalendar();
+        }
+
+        function changePersianCalendarMonth(direction) {
+            const d = isoToLocalDate(persianCalendarViewDate);
+            d.setDate(d.getDate() + direction * 20);
+            // به ماه شمسی مجاور برو، حتی در مرز ماه‌های ۲۹/۳۱ روزه
+            const current = getPersianParts(isoToLocalDate(persianCalendarViewDate));
+            for (let i = 0; i < 20; i++) {
+                const p = getPersianParts(d);
+                if (p.year !== current.year || p.month !== current.month) break;
+                d.setDate(d.getDate() + direction);
+            }
+            persianCalendarViewDate = localDateToISO(d);
+            renderPersianCalendar();
+        }
+
+        function renderPersianCalendar() {
+            const panel = document.getElementById('persianCalendar');
+            if (!panel) return;
+            const viewDate = isoToLocalDate(persianCalendarViewDate);
+            const viewParts = getPersianParts(viewDate);
+            const monthName = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { month: 'long', year: 'numeric' }).format(viewDate);
+            document.getElementById('persianCalendarTitle').textContent = monthName;
+
+            const firstDay = findPersianMonthStart(viewDate);
+            const offset = (firstDay.getDay() + 1) % 7; // هفته از شنبه آغاز می‌شود
+            const today = getTodayISO();
+            const selectedParts = getPersianParts(isoToLocalDate(selectedDateStr));
+            const days = document.getElementById('persianCalendarDays');
+            days.innerHTML = '';
+
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(firstDay);
+                date.setDate(firstDay.getDate() + i - offset);
+                const iso = localDateToISO(date);
+                const p = getPersianParts(date);
+                const inMonth = p.year === viewParts.year && p.month === viewParts.month;
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.textContent = new Intl.NumberFormat('fa-IR').format(p.day);
+                button.className = 'h-9 rounded-lg text-xs transition ' +
+                    (iso === selectedDateStr ? 'bg-emerald-600 text-white font-extrabold' :
+                    iso === today ? 'border border-emerald-500 text-emerald-700 dark:text-emerald-400 font-bold' :
+                    inMonth ? 'hover:bg-emerald-50 dark:hover:bg-slate-800' : 'text-slate-300 dark:text-slate-600');
+                button.disabled = iso > today;
+                if (button.disabled) button.classList.add('opacity-30','cursor-not-allowed');
+                button.setAttribute('aria-label', `${p.year}/${p.month}/${p.day}`);
+                button.addEventListener('click', () => {
+                    if (iso > getTodayISO()) return;
+                    selectedDateStr = iso;
+                    panel.classList.add('hidden');
+                    renderChecklistView();
+                });
+                days.appendChild(button);
+            }
+        }
+
+        function renderChecklistView() {
+            updateDateHeaderUI();
+            const stats = getDayStats(selectedDateStr);
+            const ev = stats.evaluation;
+
+            // به‌روزرسانی کارت نمره توصیفی
+            document.getElementById('gradeEmoji').textContent = ev.emoji;
+            document.getElementById('gradeTitle').textContent = ev.title;
+            document.getElementById('gradeTitle').style.color = ev.color;
+            document.getElementById('gradeSubtitle').textContent =
+                `${toPersianDigits(stats.checked)} از ${toPersianDigits(stats.total)} اقدام انجام شده`;
+
+            const ring = document.getElementById('progressRing');
+            ring.setAttribute('stroke-dasharray', `${ev.percent}, 100`);
+            ring.style.color = ev.color;
+            document.getElementById('progressPercentText').textContent = `${toPersianDigits(ev.percent)}٪`;
+
+            // رندر دسته‌بندی‌ها و آیتم‌ها
+            const container = document.getElementById('checklistCategoriesContainer');
+            container.innerHTML = '';
+
+            appState.schema.categories.forEach(cat => {
+                const catItems = appState.schema.items.filter(i => i.categoryId === cat.id && i.active);
+                if (catItems.length === 0) return;
+
+                const catCheckedCount = catItems.filter(i => stats.checkedIds.includes(i.id)).length;
+                const isAmber = cat.color === 'amber';
+
+                const sectionEl = document.createElement('div');
+                sectionEl.className = 'bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-sm border border-slate-200/70 dark:border-slate-800 space-y-3';
+
+                sectionEl.innerHTML = `
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">${cat.icon || '📌'}</span>
+                            <h3 class="text-sm sm:text-base font-extrabold ${isAmber ? 'text-amber-700 dark:text-amber-400' : 'text-emerald-800 dark:text-emerald-400'}">
+                                ${cat.title}
+                            </h3>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-xl text-xs font-bold ${isAmber ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300'}">
+                            ${toPersianDigits(catCheckedCount)} / ${toPersianDigits(catItems.length)}
+                        </span>
+                    </div>
+                    <div class="space-y-2.5" id="list_${cat.id}"></div>
+                `;
+
+                const listContainer = sectionEl.querySelector(`#list_${cat.id}`);
+
+                catItems.forEach(item => {
+                    const isChecked = stats.checkedIds.includes(item.id);
+                    const itemBtn = document.createElement('div');
+                    itemBtn.onclick = () => toggleChecklistItem(item.id);
+                    itemBtn.className = `group cursor-pointer select-none p-3.5 rounded-2xl border transition-all duration-200 flex items-start gap-3 ${
+                        isChecked
+                            ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-400/70 dark:border-emerald-700/70 shadow-sm'
+                            : 'bg-slate-50/70 dark:bg-slate-800/40 border-slate-200/80 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-slate-700'
+                    }`;
+
+                    itemBtn.innerHTML = `
+                        <div class="mt-0.5 w-6 h-6 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                            isChecked
+                                ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30 check-pop'
+                                : 'bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 group-hover:border-emerald-500'
+                        }">
+                            ${isChecked ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-xs sm:text-sm font-bold transition-colors ${
+                                isChecked
+                                    ? 'text-emerald-950 dark:text-emerald-200'
+                                    : 'text-slate-800 dark:text-slate-100'
+                            }">
+                                ${item.title}
+                            </div>
+                            ${item.description ? `
+                                <p class="text-[11px] sm:text-xs mt-1 leading-relaxed ${
+                                    isChecked
+                                        ? 'text-emerald-800/80 dark:text-emerald-300/80'
+                                        : 'text-slate-500 dark:text-slate-400'
+                                }">
+                                    ${item.description}
+                                </p>
+                            ` : ''}
+                        </div>
+                    `;
+
+                    listContainer.appendChild(itemBtn);
+                });
+
+                container.appendChild(sectionEl);
+            });
+
+            // وضعیت آهنگ پیشواز
+            renderPishvazButton();
+
+            // یادداشت روزانه
+            document.getElementById('dailyNoteInput').value = stats.note;
+        }
+
+        function toggleChecklistItem(itemId) {
+            if (!appState.records[selectedDateStr]) {
+                appState.records[selectedDateStr] = { checkedIds: [], note: '' };
+            }
+            const list = appState.records[selectedDateStr].checkedIds;
+            const idx = list.indexOf(itemId);
+            if (idx === -1) {
+                list.push(itemId);
+            } else {
+                list.splice(idx, 1);
+            }
+            saveDatabase();
+            renderChecklistView();
+        }
+
+        function renderPishvazButton() {
+            const btn = document.getElementById('pishvazToggleBtn');
+            if (appState.pishvazDone) {
+                btn.className = 'shrink-0 px-3.5 py-2 rounded-2xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 bg-emerald-600 text-white';
+                btn.innerHTML = '<span>فعال شده ✓</span>';
+            } else {
+                btn.className = 'shrink-0 px-3.5 py-2 rounded-2xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 bg-white dark:bg-slate-800 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700';
+                btn.innerHTML = '<span>انجام دادم</span>';
+            }
+        }
+
+        function togglePishvaz() {
+            appState.pishvazDone = !appState.pishvazDone;
+            saveDatabase();
+            renderPishvazButton();
+            showToast(appState.pishvazDone ? 'آفرین! اقدام یک‌باره آهنگ پیشواز ثبت شد 🌿' : 'وضعیت آهنگ پیشواز به حالت انجام‌نشده تغییر کرد');
+        }
+
+        let noteSaveTimeout = null;
+        function saveDailyNote(text) {
+            if (!appState.records[selectedDateStr]) {
+                appState.records[selectedDateStr] = { checkedIds: [], note: '' };
+            }
+            appState.records[selectedDateStr].note = text;
+            saveDatabase();
+
+            const indicator = document.getElementById('noteSavedIndicator');
+            indicator.style.opacity = '1';
+            clearTimeout(noteSaveTimeout);
+            noteSaveTimeout = setTimeout(() => {
+                indicator.style.opacity = '0';
+            }, 1500);
+        }
+
+        /* ==========================================================================
+           ۵. نمودارهای روند پیشرفت و خروجی گرافیکی JPEG
+           ========================================================================== */
+        function setChartRange(days) {
+            currentChartRange = days;
+            document.querySelectorAll('.range-btn').forEach(btn => {
+                const isActive = Number(btn.dataset.range) === days;
+                btn.className = isActive
+                    ? 'range-btn flex-1 py-2 rounded-xl transition bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm'
+                    : 'range-btn flex-1 py-2 rounded-xl transition text-slate-600 dark:text-slate-400';
+            });
+            renderAnalyticsView();
+        }
+
+        function setChartType(type) {
+            currentChartType = type;
+            document.querySelectorAll('.chart-type-btn').forEach(btn => {
+                const isActive = btn.dataset.type === type;
+                btn.className = isActive
+                    ? 'chart-type-btn flex-1 py-2 rounded-xl transition bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm'
+                    : 'chart-type-btn flex-1 py-2 rounded-xl transition text-slate-600 dark:text-slate-400';
+            });
+            renderAnalyticsView();
+        }
+
+        function getRangeData(days) {
+            const today = getTodayISO();
+            const result = [];
+            for (let i = days - 1; i >= 0; i--) {
+                const iso = addDaysToISO(today, -i);
+                const stats = getDayStats(iso);
+                // امتیاز نرمال‌شده از ۰ تا ۱۰ برای نمودار
+                const score10 = stats.total > 0 ? Number(((stats.checked / stats.total) * 10).toFixed(1)) : 0;
+                result.push({
+                    iso,
+                    shortDate: formatPersianDate(iso, true),
+                    fullDate: formatPersianDate(iso, false),
+                    score10,
+                    checked: stats.checked,
+                    total: stats.total,
+                    hasRecord: stats.hasRecord,
+                    evaluation: stats.evaluation
+                });
+            }
+            return result;
+        }
+
+        function renderAnalyticsView() {
+            const data = getRangeData(currentChartRange);
+
+            // محاسبه آمارهای خلاصه
+            const recordedDays = data.filter(d => d.hasRecord);
+            const activeCount = recordedDays.length;
+            const avgScore10 = activeCount > 0
+                ? recordedDays.reduce((acc, cur) => acc + cur.score10, 0) / activeCount
+                : 0;
+            const avgEval = evaluateScore(Math.round(avgScore10), 10);
+
+            document.getElementById('statAvgGrade').textContent = activeCount > 0 ? `${avgEval.emoji} ${avgEval.title}` : 'ثبت نشده';
+            document.getElementById('statAvgPercent').textContent = activeCount > 0 ? `میانگین ${toPersianDigits(Math.round(avgScore10 * 10))}٪` : 'بدون داده';
+
+            if (activeCount > 0) {
+                const best = [...recordedDays].sort((a, b) => b.score10 - a.score10)[0];
+                document.getElementById('statBestDay').textContent = best.shortDate;
+                document.getElementById('statBestScore').textContent = `${best.evaluation.emoji} ${best.evaluation.title} (${toPersianDigits(best.checked)}/${toPersianDigits(best.total)})`;
+            } else {
+                document.getElementById('statBestDay').textContent = '-';
+                document.getElementById('statBestScore').textContent = '-';
+            }
+            document.getElementById('statActiveDays').textContent = `${toPersianDigits(activeCount)} از ${toPersianDigits(currentChartRange)} روز`;
+
+            // رندر نمودار یا تقویم حرارتی
+            const canvas = document.getElementById('progressChartCanvas');
+            const heatmap = document.getElementById('heatmapContainer');
+
+            if (chartInstance) {
+                chartInstance.destroy();
+                chartInstance = null;
+            }
+
+            if (currentChartType === 'heatmap') {
+                canvas.classList.add('hidden');
+                heatmap.classList.remove('hidden');
+                renderHeatmap(data, heatmap);
+            } else {
+                heatmap.classList.add('hidden');
+                canvas.classList.remove('hidden');
+                renderChartJS(data, canvas);
+            }
+
+            // رندر لیست تاریخچه اخیر (۱۰ روز گذشته)
+            renderRecentHistory();
+        }
+
+        function renderHeatmap(data, container) {
+            container.innerHTML = `
+                <div class="grid grid-cols-5 sm:grid-cols-7 gap-2">
+                    ${data.map(d => {
+                        let bg = 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700';
+                        if (d.hasRecord) {
+                            if (d.evaluation.level === 5) bg = 'bg-emerald-600 text-white border-emerald-700';
+                            else if (d.evaluation.level === 4) bg = 'bg-teal-500 text-white border-teal-600';
+                            else if (d.evaluation.level === 3) bg = 'bg-blue-500 text-white border-blue-600';
+                            else if (d.evaluation.level === 2) bg = 'bg-amber-400 text-slate-900 border-amber-500';
+                            else if (d.evaluation.level === 1) bg = 'bg-orange-500 text-white border-orange-600';
+                            else bg = 'bg-rose-500 text-white border-rose-600';
+                        }
+                        return `
+                            <div onclick="jumpToDate('${d.iso}')" class="cursor-pointer rounded-2xl p-2 border ${bg} flex flex-col items-center justify-center text-center transition hover:scale-105">
+                                <span class="text-[10px] font-bold opacity-90">${d.shortDate}</span>
+                                <span class="text-base my-0.5">${d.hasRecord ? d.evaluation.emoji : '·'}</span>
+                                <span class="text-[9px] font-extrabold">${d.hasRecord ? d.evaluation.title : 'ثبت نشده'}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderChartJS(data, canvas) {
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#cbd5e1' : '#475569';
+            const gridColor = isDark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(148, 163, 184, 0.2)';
+
+            if (currentChartType === 'radar') {
+                // محاسبه میانگین عملکرد به تفکیک دسته‌بندی‌ها
+                const catLabels = appState.schema.categories.map(c => c.title.replace(/^بخش\s+(اول|دوم|سوم):\s*/, ''));
+                const catScores = appState.schema.categories.map(cat => {
+                    const catItems = appState.schema.items.filter(i => i.categoryId === cat.id && i.active);
+                    if (catItems.length === 0) return 0;
+                    let sumPercent = 0;
+                    let daysCount = 0;
+                    data.forEach(d => {
+                        if (d.hasRecord) {
+                            const rec = appState.records[d.iso];
+                            const checkedInCat = catItems.filter(i => rec.checkedIds.includes(i.id)).length;
+                            sumPercent += (checkedInCat / catItems.length) * 100;
+                            daysCount++;
+                        }
+                    });
+                    return daysCount > 0 ? Math.round(sumPercent / daysCount) : 0;
+                });
+
+                // اگر کمتر از ۳ دسته داریم، برای زیبایی رادار چند محور کلیدی اضافه می‌کنیم
+                if (catLabels.length < 3) {
+                    catLabels.push('استمرار روزانه');
+                    const activeDays = data.filter(d => d.hasRecord).length;
+                    catScores.push(Math.round((activeDays / data.length) * 100));
+                }
+
+                chartInstance = new Chart(canvas, {
+                    type: 'radar',
+                    data: {
+                        labels: catLabels,
+                        datasets: [{
+                            label: 'درصد تحقق برنامه‌ها',
+                            data: catScores,
+                            backgroundColor: 'rgba(16, 185, 129, 0.25)',
+                            borderColor: '#059669',
+                            borderWidth: 2.5,
+                            pointBackgroundColor: '#f59e0b',
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                min: 0,
+                                max: 100,
+                                ticks: { stepSize: 25, backdropColor: 'transparent', color: textColor, font: { family: 'Vazirmatn', size: 10 } },
+                                pointLabels: { color: textColor, font: { family: 'Vazirmatn', size: 11, weight: 'bold' } },
+                                grid: { color: gridColor },
+                                angleLines: { color: gridColor }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+                return;
+            }
+
+            // نمودار خطی منحنی یا میله‌ای
+            const labels = data.map(d => d.shortDate);
+            const scores = data.map(d => d.score10);
+            const pointColors = data.map(d => d.hasRecord ? d.evaluation.color : '#94a3b8');
+
+            chartInstance = new Chart(canvas, {
+                type: currentChartType,
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'امتیاز عملکرد',
+                        data: scores,
+                        borderColor: '#059669',
+                        backgroundColor: currentChartType === 'line'
+                            ? 'rgba(16, 185, 129, 0.16)'
+                            : pointColors,
+                        borderWidth: currentChartType === 'line' ? 3 : 0,
+                        borderRadius: currentChartType === 'bar' ? 8 : 0,
+                        fill: currentChartType === 'line',
+                        tension: 0.38,
+                        pointBackgroundColor: pointColors,
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5.5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 10,
+                            ticks: {
+                                stepSize: 2,
+                                color: textColor,
+                                font: { family: 'Vazirmatn', size: 10, weight: '600' },
+                                callback: function(val) {
+                                    if (val === 10) return 'عالی 🏆';
+                                    if (val === 8) return 'خیلی خوب 🌟';
+                                    if (val === 6) return 'خوب ✅';
+                                    if (val === 4) return 'متوسط ➖';
+                                    if (val === 2) return 'ضعیف ⚠️';
+                                    if (val === 0) return 'خیلی ضعیف ❌';
+                                    return '';
+                                }
+                            },
+                            grid: { color: gridColor }
+                        },
+                        x: {
+                            ticks: {
+                                color: textColor,
+                                font: { family: 'Vazirmatn', size: 10 },
+                                maxRotation: 45
+                            },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            rtl: true,
+                            textDirection: 'rtl',
+                            backgroundColor: isDark ? '#0f172a' : '#1e293b',
+                            titleFont: { family: 'Vazirmatn', size: 12 },
+                            bodyFont: { family: 'Vazirmatn', size: 12 },
+                            padding: 10,
+                            cornerRadius: 12,
+                            callbacks: {
+                                label: function(context) {
+                                    const d = data[context.dataIndex];
+                                    if (!d.hasRecord) return 'این روز هنوز ثبت نشده است';
+                                    return `وضعیت: ${d.evaluation.emoji} ${d.evaluation.title} (${toPersianDigits(d.checked)} از ${toPersianDigits(d.total)})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderRecentHistory() {
+            const listEl = document.getElementById('recentHistoryList');
+            const recent7 = getRangeData(7).reverse();
+
+            listEl.innerHTML = recent7.map(d => `
+                <div onclick="jumpToDate('${d.iso}')" class="cursor-pointer p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 hover:bg-emerald-50/70 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-700/70 flex items-center justify-between transition">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xl">${d.hasRecord ? d.evaluation.emoji : '⚪'}</span>
+                        <div>
+                            <div class="text-xs font-bold text-slate-800 dark:text-slate-100">${d.fullDate}</div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400">
+                                ${d.hasRecord ? `${toPersianDigits(d.checked)} از ${toPersianDigits(d.total)} اقدام انجام شده` : 'بدون ثبت عملکرد (برای ثبت کلیک کنید)'}
+                            </div>
+                        </div>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-xl text-xs font-extrabold" style="background-color: ${d.hasRecord ? d.evaluation.color + '18' : 'transparent'}; color: ${d.hasRecord ? d.evaluation.color : '#94a3b8'}">
+                        ${d.hasRecord ? d.evaluation.title : 'ثبت نشده'}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function jumpToDate(isoStr) {
+            selectedDateStr = isoStr;
+            switchTab('checklist');
+            showToast(`تاریخ به ${formatPersianDate(isoStr, true)} تغییر کرد`);
+        }
+
+        /* ==========================================================================
+           ۶. تولید پوستر و خروجی گرافیکی باکیفیت JPEG از نمودار و گزارش عملکرد
+           ========================================================================== */
+        function openJpegTemplatePicker() {
+            const picker = document.getElementById('jpegTemplatePicker');
+            picker.classList.remove('hidden');
+            picker.classList.add('flex');
+            refreshJpegTemplatePicker();
+        }
+
+        function closeJpegTemplatePicker() {
+            const picker = document.getElementById('jpegTemplatePicker');
+            picker.classList.add('hidden');
+            picker.classList.remove('flex');
+        }
+
+        function selectJpegTemplate(template) {
+            const select = document.getElementById('jpegTemplateSelect');
+            if (!select || !Array.from(select.options).some(option => option.value === template)) return;
+            select.value = template;
+            refreshJpegTemplatePicker();
+        }
+
+        function refreshJpegTemplatePicker() {
+            const select = document.getElementById('jpegTemplateSelect');
+            const labels = {
+                classic: 'زمردی کلاسیک',
+                midnight: 'سرمه‌ای و طلایی',
+                rose: 'رزگلد لطیف',
+                ivory: 'کاغذی و فیروزه‌ای',
+                sky: 'آبی آسمانی',
+                violet: 'بنفش خیال',
+                ruby: 'یاقوتی فاخر',
+                olive: 'زیتونی طبیعی',
+                sand: 'مینیمال خاکی',
+                lapis: 'لاجوردی ایرانی',
+                sunrise: 'طلوع امید',
+                silver: 'مشکی و نقره‌ای',
+                pinkwhite: 'صورتی ملیح و سفید'
+            };
+            const selected = select?.value || 'classic';
+            document.getElementById('jpegTemplateCurrentLabel').textContent = labels[selected];
+            document.getElementById('jpegTemplateSelectedHint').textContent = `قالب انتخاب‌شده: ${labels[selected]}`;
+            document.querySelectorAll('.jpeg-template-option').forEach(card => {
+                const active = card.dataset.jpegTemplate === selected;
+                card.classList.toggle('border-emerald-500', active);
+                card.classList.toggle('border-transparent', !active);
+                card.classList.toggle('bg-emerald-50/50', active);
+                card.classList.toggle('dark:bg-emerald-950/20', active);
+                const check = card.querySelector('.jpeg-template-check');
+                if (check) check.classList.toggle('hidden', !active);
+            });
+        }
+
+        function exportChartAsJPEG() {
+            try {
+                const canvas = document.getElementById('jpegExportCanvas');
+                const ctx = canvas.getContext('2d');
+                const W = canvas.width;  // 1080
+                const H = canvas.height; // 1350
+
+                // پالت قالب انتخابی؛ قالب کلاسیک همان طرح اصلی قبلی است
+                const palettes = {
+                    classic: { bg: ['#064e3b', '#047857', '#0f766e'], pattern: 'rgba(255,255,255,0.06)', title: '#ffffff', subtitle: '#a7f3d0', name: '#fef3c7', footer: 'rgba(255,255,255,0.12)', quote: '#fef3c7', source: '#a7f3d0', chart: '#059669', area: 'rgba(5,150,105,' },
+                    midnight: { bg: ['#111827', '#1e293b', '#312e81'], pattern: 'rgba(251,191,36,0.10)', title: '#fff7ed', subtitle: '#c4b5fd', name: '#fcd34d', footer: 'rgba(255,255,255,0.10)', quote: '#fde68a', source: '#c4b5fd', chart: '#7c3aed', area: 'rgba(124,58,237,' },
+                    rose: { bg: ['#881337', '#be185d', '#9d174d'], pattern: 'rgba(255,255,255,0.09)', title: '#fff1f2', subtitle: '#fbcfe8', name: '#fef08a', footer: 'rgba(255,255,255,0.13)', quote: '#fff1f2', source: '#fbcfe8', chart: '#db2777', area: 'rgba(219,39,119,' },
+                    ivory: { bg: ['#164e63', '#0e7490', '#0f766e'], pattern: 'rgba(255,255,255,0.10)', title: '#ecfeff', subtitle: '#cffafe', name: '#fef3c7', footer: 'rgba(255,255,255,0.15)', quote: '#ecfeff', source: '#cffafe', chart: '#0e7490', area: 'rgba(14,116,144,' },
+                    sky: { bg: ['#0c4a6e', '#0284c7', '#38bdf8'], pattern: 'rgba(255,255,255,0.08)', title: '#e0f2fe', subtitle: '#7dd3fc', name: '#fef08a', footer: 'rgba(255,255,255,0.13)', quote: '#e0f2fe', source: '#7dd3fc', chart: '#0369a1', area: 'rgba(3,105,161,' },
+                    violet: { bg: ['#3b0764', '#6d28d9', '#a78bfa'], pattern: 'rgba(255,255,255,0.08)', title: '#ede9fe', subtitle: '#c4b5fd', name: '#fde68a', footer: 'rgba(255,255,255,0.13)', quote: '#ede9fe', source: '#c4b5fd', chart: '#7c3aed', area: 'rgba(124,58,237,' },
+                    ruby: { bg: ['#450a0a', '#991b1b', '#e11d48'], pattern: 'rgba(255,255,255,0.08)', title: '#ffe4e6', subtitle: '#fda4af', name: '#fef3c7', footer: 'rgba(255,255,255,0.13)', quote: '#ffe4e6', source: '#fda4af', chart: '#e11d48', area: 'rgba(225,29,72,' },
+                    olive: { bg: ['#365314', '#4d7c0f', '#a3a34b'], pattern: 'rgba(255,255,255,0.08)', title: '#ecfccb', subtitle: '#bef264', name: '#fef9c3', footer: 'rgba(255,255,255,0.13)', quote: '#ecfccb', source: '#bef264', chart: '#65a30d', area: 'rgba(101,163,13,' },
+                    sand: { bg: ['#57534e', '#a8a29e', '#d6d3d1'], pattern: 'rgba(255,255,255,0.08)', title: '#fafaf9', subtitle: '#e7e5e4', name: '#fef3c7', footer: 'rgba(255,255,255,0.13)', quote: '#fafaf9', source: '#e7e5e4', chart: '#78716c', area: 'rgba(120,113,108,' },
+                    lapis: { bg: ['#172554', '#1d4ed8', '#0e7490'], pattern: 'rgba(255,255,255,0.08)', title: '#dbeafe', subtitle: '#93c5fd', name: '#fde68a', footer: 'rgba(255,255,255,0.13)', quote: '#dbeafe', source: '#93c5fd', chart: '#2563eb', area: 'rgba(37,99,235,' },
+                    sunrise: { bg: ['#7c2d12', '#ea580c', '#fbbf24'], pattern: 'rgba(255,255,255,0.08)', title: '#ffedd5', subtitle: '#fed7aa', name: '#fef3c7', footer: 'rgba(255,255,255,0.13)', quote: '#ffedd5', source: '#fed7aa', chart: '#ea580c', area: 'rgba(234,88,12,' },
+                    silver: { bg: ['#18181b', '#3f3f46', '#71717a'], pattern: 'rgba(255,255,255,0.08)', title: '#f4f4f5', subtitle: '#d4d4d8', name: '#fafafa', footer: 'rgba(255,255,255,0.13)', quote: '#f4f4f5', source: '#d4d4d8', chart: '#71717a', area: 'rgba(113,113,122,' },
+                    pinkwhite: { bg: ['#fff1f2', '#ffffff', '#fce7f3'], pattern: 'rgba(190,24,93,0.10)', title: '#9d174d', subtitle: '#be185d', name: '#db2777', footer: 'rgba(244,114,182,0.14)', quote: '#831843', source: '#be185d', chart: '#ec4899', area: 'rgba(236,72,153,' }
+                };
+                const selectedTemplate = document.getElementById('jpegTemplateSelect')?.value || 'classic';
+                const palette = palettes[selectedTemplate] || palettes.classic;
+
+                // ۱. پس‌زمینه گرادیان قالب انتخاب‌شده
+                const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+                bgGrad.addColorStop(0, palette.bg[0]);
+                bgGrad.addColorStop(0.5, palette.bg[1]);
+                bgGrad.addColorStop(1, palette.bg[2]);
+                ctx.fillStyle = bgGrad;
+                ctx.fillRect(0, 0, W, H);
+
+                // نقش اسلیمی هندسی ظریف در پس‌زمینه
+                ctx.strokeStyle = palette.pattern;
+                ctx.lineWidth = 2;
+                for (let x = 0; x < W; x += 90) {
+                    for (let y = 0; y < H; y += 90) {
+                        ctx.beginPath();
+                        ctx.arc(x, y, 45, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                }
+
+                // ۲. هدر پوستر
+                ctx.fillStyle = palette.title;
+                ctx.textAlign = 'center';
+                ctx.font = '900 48px Vazirmatn, Tahoma, sans-serif';
+                ctx.fillText('🌿 گزارش ارزیابی عملکرد مهدوی 🌿', W / 2, 105);
+
+                ctx.fillStyle = palette.subtitle;
+                ctx.font = '600 26px Vazirmatn, Tahoma, sans-serif';
+                const todayPersian = formatPersianDate(getTodayISO(), false);
+                ctx.fillText(`اپلیکیشن «همراهِ یار»  |  ${todayPersian}`, W / 2, 155);
+
+                // نام صاحب گزارش
+                const fullName = [appState.firstName, appState.lastName].filter(Boolean).join(' ');
+                ctx.fillStyle = palette.name;
+                ctx.font = '800 27px Vazirmatn, Tahoma, sans-serif';
+                ctx.fillText(`گزارش اختصاصی: ${fullName}`, W / 2, 198);
+
+                // ۳. کارت سفید مرکزی برای نمودار و آمارها
+                const cardX = 60, cardY = 220, cardW = W - 120, cardH = 870;
+                roundRect(ctx, cardX, cardY, cardW, cardH, 40, '#ffffff');
+
+                // آماده‌سازی داده‌های بازه فعلی
+                const data = getRangeData(currentChartRange);
+                const recordedDays = data.filter(d => d.hasRecord);
+                const avgScore10 = recordedDays.length > 0
+                    ? recordedDays.reduce((a, b) => a + b.score10, 0) / recordedDays.length
+                    : 0;
+                const avgEval = evaluateScore(Math.round(avgScore10), 10);
+
+                // باکس‌های آمار در بالای کارت سفید
+                const boxY = cardY + 35;
+                const boxW = (cardW - 100) / 3;
+                const boxH = 135;
+
+                // باکس ۱: میانگین دوره
+                roundRect(ctx, cardX + 30, boxY, boxW, boxH, 24, '#ecfdf5');
+                ctx.fillStyle = '#065f46';
+                ctx.font = '600 22px Vazirmatn, sans-serif';
+                ctx.fillText(`میانگین ${toPersianDigits(currentChartRange)} روز اخیر`, cardX + 30 + boxW / 2, boxY + 42);
+                ctx.fillStyle = avgEval.color;
+                ctx.font = '900 34px Vazirmatn, sans-serif';
+                ctx.fillText(recordedDays.length > 0 ? `${avgEval.emoji} ${avgEval.title}` : 'ثبت نشده', cardX + 30 + boxW / 2, boxY + 95);
+
+                // باکس ۲: استمرار
+                roundRect(ctx, cardX + 50 + boxW, boxY, boxW, boxH, 24, '#f0fdfa');
+                ctx.fillStyle = '#115e59';
+                ctx.font = '600 22px Vazirmatn, sans-serif';
+                ctx.fillText('روزهای ثبت‌شده', cardX + 50 + boxW + boxW / 2, boxY + 42);
+                ctx.fillStyle = '#0d9488';
+                ctx.font = '900 34px Vazirmatn, sans-serif';
+                ctx.fillText(`${toPersianDigits(recordedDays.length)} از ${toPersianDigits(currentChartRange)} روز`, cardX + 50 + boxW + boxW / 2, boxY + 95);
+
+                // باکس ۳: وضعیت امروز
+                const todayStats = getDayStats(getTodayISO());
+                roundRect(ctx, cardX + 70 + boxW * 2, boxY, boxW, boxH, 24, '#fffbeb');
+                ctx.fillStyle = '#92400e';
+                ctx.font = '600 22px Vazirmatn, sans-serif';
+                ctx.fillText('عملکرد امروز', cardX + 70 + boxW * 2 + boxW / 2, boxY + 42);
+                ctx.fillStyle = todayStats.evaluation.color;
+                ctx.font = '900 34px Vazirmatn, sans-serif';
+                ctx.fillText(`${todayStats.evaluation.emoji} ${todayStats.evaluation.title}`, cardX + 70 + boxW * 2 + boxW / 2, boxY + 95);
+
+                // ۴. رسم نمودار روند اختصاصی باکیفیت بالا روی پوستر
+                const chartLeft = cardX + 165;
+                const chartRight = cardX + cardW - 50;
+                const chartTop = boxY + boxH + 70;
+                const chartBottom = cardY + cardH - 95;
+                const chartW = chartRight - chartLeft;
+                const chartH = chartBottom - chartTop;
+
+                // خطوط راهنمای افقی و برچسب‌های توصیفی محور عمودی
+                const yLevels = [
+                    { val: 10, label: 'عالی 🏆' },
+                    { val: 8, label: 'خیلی خوب 🌟' },
+                    { val: 6, label: 'خوب ✅' },
+                    { val: 4, label: 'متوسط ➖' },
+                    { val: 2, label: 'ضعیف ⚠️' },
+                    { val: 0, label: 'خیلی ضعیف ❌' }
+                ];
+
+                ctx.textAlign = 'right';
+                yLevels.forEach(lvl => {
+                    const y = chartBottom - (lvl.val / 10) * chartH;
+                    ctx.strokeStyle = '#e2e8f0';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(chartLeft, y);
+                    ctx.lineTo(chartRight, y);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#475569';
+                    ctx.font = '700 20px Vazirmatn, sans-serif';
+                    ctx.fillText(lvl.label, chartLeft - 18, y + 7);
+                });
+
+                // رسم منحنی و نقاط داده
+                const stepX = data.length > 1 ? chartW / (data.length - 1) : chartW / 2;
+                const points = data.map((d, idx) => ({
+                    x: chartLeft + idx * stepX,
+                    y: chartBottom - (d.score10 / 10) * chartH,
+                    d
+                }));
+
+                // ناحیه سایه زیر نمودار
+                if (points.length > 1) {
+                    const areaGrad = ctx.createLinearGradient(0, chartTop, 0, chartBottom);
+                    areaGrad.addColorStop(0, `${palette.area}0.30)`);
+                    areaGrad.addColorStop(1, `${palette.area}0.02)`);
+
+                    ctx.beginPath();
+                    ctx.moveTo(points[0].x, chartBottom);
+                    points.forEach(p => ctx.lineTo(p.x, p.y));
+                    ctx.lineTo(points[points.length - 1].x, chartBottom);
+                    ctx.closePath();
+                    ctx.fillStyle = areaGrad;
+                    ctx.fill();
+
+                    // خط اصلی روند
+                    ctx.beginPath();
+                    ctx.moveTo(points[0].x, points[0].y);
+                    points.forEach(p => ctx.lineTo(p.x, p.y));
+                    ctx.strokeStyle = palette.chart;
+                    ctx.lineWidth = 6;
+                    ctx.lineJoin = 'round';
+                    ctx.stroke();
+                }
+
+                // نقاط و تاریخ‌های محور افقی
+                ctx.textAlign = 'center';
+                const labelInterval = data.length > 15 ? 3 : (data.length > 8 ? 2 : 1);
+                points.forEach((p, idx) => {
+                    // دایره نقطه
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+                    ctx.fillStyle = p.d.hasRecord ? p.d.evaluation.color : '#94a3b8';
+                    ctx.fill();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.stroke();
+
+                    // تاریخ پایین نمودار
+                    if (idx % labelInterval === 0 || idx === points.length - 1) {
+                        ctx.fillStyle = '#334155';
+                        ctx.font = '600 18px Vazirmatn, sans-serif';
+                        ctx.fillText(p.d.shortDate, p.x, chartBottom + 42);
+                    }
+                });
+
+                // ۵. فوتر و جمله مهدوی انگیزشی در پایین پوستر
+                const q = MAHDAVI_QUOTES[currentQuoteIndex % MAHDAVI_QUOTES.length];
+                roundRect(ctx, 60, 1125, W - 120, 165, 32, palette.footer);
+
+                ctx.fillStyle = palette.quote;
+                ctx.textAlign = 'center';
+                ctx.font = '700 25px Vazirmatn, sans-serif';
+                wrapCanvasText(ctx, q.text, W / 2, 1185, W - 190, 38);
+
+                ctx.fillStyle = palette.source;
+                ctx.font = '500 20px Vazirmatn, sans-serif';
+                ctx.fillText(`${q.source}  •  تهیه شده با اپلیکیشن همراهِ یار`, W / 2, 1265);
+
+                // ۶. تبدیل به فایل JPEG با کیفیت 0.95 و دانلود خودکار
+                const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                const link = document.createElement('a');
+                link.download = `gozaresh-mahdavi-${selectedTemplate}-${getTodayISO()}.jpg`;
+                link.href = jpegDataUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showToast('خروجی گرافیکی JPEG با موفقیت ذخیره شد 🖼️');
+            } catch (err) {
+                console.error(err);
+                showToast('خطا در تولید تصویر خروجی', true);
+            }
+        }
+
+        function roundRect(ctx, x, y, width, height, radius, fillStyle) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fillStyle = fillStyle;
+            ctx.fill();
+        }
+
+        function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+            const words = text.split(' ');
+            let line = '';
+            let currentY = y;
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = ctx.measureText(testLine);
+                if (metrics.width > maxWidth && n > 0) {
+                    ctx.fillText(line.trim(), x, currentY);
+                    line = words[n] + ' ';
+                    currentY += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line.trim(), x, currentY);
+        }
+
+        /* ==========================================================================
+           ۷. مدیریت و سفارشی‌سازی چک‌لیست‌ها (افزودن، ویرایش، غیرفعال‌سازی)
+           ========================================================================== */
+        function renderManageView() {
+            // پر کردن سلکت باکس دسته‌بندی‌ها
+            const select = document.getElementById('newItemCategorySelect');
+            select.innerHTML = appState.schema.categories.map(c =>
+                `<option value="${c.id}">${c.icon || '📌'} ${c.title}</option>`
+            ).join('');
+
+            // رندر لیست دسته‌بندی‌ها و آیتم‌ها
+            const container = document.getElementById('manageItemsContainer');
+            container.innerHTML = '';
+
+            appState.schema.categories.forEach(cat => {
+                const items = appState.schema.items.filter(i => i.categoryId === cat.id);
+                const catBox = document.createElement('div');
+                catBox.className = 'rounded-2xl border border-slate-200 dark:border-slate-800 p-3.5 space-y-2.5 bg-slate-50/50 dark:bg-slate-800/30';
+
+                catBox.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold text-slate-700 dark:text-slate-200">${cat.icon || '📌'} ${cat.title}</span>
+                        ${!cat.id.startsWith('cat_individual') && !cat.id.startsWith('cat_social') ? `
+                            <button onclick="deleteCategory('${cat.id}')" class="text-[11px] text-rose-600 hover:underline">حذف بخش</button>
+                        ` : ''}
+                    </div>
+                    <div class="space-y-2">
+                        ${items.length === 0 ? '<p class="text-[11px] text-slate-400">آیتمی در این بخش وجود ندارد.</p>' : ''}
+                        ${items.map(item => `
+                            <div class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2 ${!item.active ? 'opacity-55' : ''}">
+                                <div class="min-w-0 flex-1">
+                                    <div class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">${item.title}</div>
+                                    ${item.description ? `<div class="text-[10px] text-slate-500 truncate">${item.description}</div>` : ''}
+                                </div>
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <button onclick="toggleItemActive('${item.id}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${item.active ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}">
+                                        ${item.active ? 'فعال' : 'غیرفعال'}
+                                    </button>
+                                    ${!item.isDefault ? `
+                                        <button onclick="deleteCustomItem('${item.id}')" class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50" title="حذف">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(catBox);
+            });
+        }
+
+        function addNewChecklistItem() {
+            const catId = document.getElementById('newItemCategorySelect').value;
+            const title = document.getElementById('newItemTitleInput').value.trim();
+            const desc = document.getElementById('newItemDescInput').value.trim();
+
+            if (!title) {
+                showToast('لطفاً عنوان اقدام را وارد کنید', true);
+                return;
+            }
+
+            const newItem = {
+                id: 'custom_item_' + Date.now(),
+                categoryId: catId,
+                title,
+                description: desc,
+                active: true,
+                isDefault: false
+            };
+
+            appState.schema.items.push(newItem);
+            saveDatabase();
+
+            document.getElementById('newItemTitleInput').value = '';
+            document.getElementById('newItemDescInput').value = '';
+            renderManageView();
+            showToast('آیتم جدید به چک‌لیست اضافه شد ✓');
+        }
+
+        function addNewCategory() {
+            const title = document.getElementById('newCategoryTitleInput').value.trim();
+            if (!title) {
+                showToast('لطفاً نام بخش جدید را وارد کنید', true);
+                return;
+            }
+            appState.schema.categories.push({
+                id: 'custom_cat_' + Date.now(),
+                title,
+                icon: '💠',
+                color: 'emerald'
+            });
+            saveDatabase();
+            document.getElementById('newCategoryTitleInput').value = '';
+            renderManageView();
+            showToast('بخش جدید ایجاد شد ✓');
+        }
+
+        function toggleItemActive(itemId) {
+            const item = appState.schema.items.find(i => i.id === itemId);
+            if (item) {
+                item.active = !item.active;
+                saveDatabase();
+                renderManageView();
+                showToast(item.active ? 'آیتم فعال شد' : 'آیتم غیرفعال شد');
+            }
+        }
+
+        function deleteCustomItem(itemId) {
+            appState.schema.items = appState.schema.items.filter(i => i.id !== itemId);
+            saveDatabase();
+            renderManageView();
+            showToast('آیتم حذف شد');
+        }
+
+        function deleteCategory(catId) {
+            appState.schema.categories = appState.schema.categories.filter(c => c.id !== catId);
+            appState.schema.items = appState.schema.items.filter(i => i.categoryId !== catId);
+            saveDatabase();
+            renderManageView();
+            showToast('بخش و موارد آن حذف شدند');
+        }
+
+        function confirmResetDefaults() {
+            openModal(
+                'بازگردانی چک‌لیست پیش‌فرض',
+                'آیا مطمئن هستید که می‌خواهید ساختار چک‌لیست به ۱۰ مورد پیش‌فرض اولیه بازگردد؟ (سوابق ثبت‌شده روزهای قبل شما حفظ خواهد شد.)',
+                [
+                    { text: 'انصراف', style: 'secondary', onClick: closeModal },
+                    {
+                        text: 'بله، بازگردانی شود',
+                        style: 'danger',
+                        onClick: () => {
+                            appState.schema = JSON.parse(JSON.stringify(DEFAULT_SCHEMA));
+                            saveDatabase();
+                            renderManageView();
+                            closeModal();
+                            showToast('چک‌لیست به حالت پیش‌فرض بازگشت');
+                        }
+                    }
+                ]
+            );
+        }
+
+        /* ==========================================================================
+           ۸. پشتیبان‌گیری و بازیابی دیتابیس (JSON Backup & Restore)
+           ========================================================================== */
+        function exportDatabaseJSON() {
+            try {
+                const payload = {
+                    app: 'HamrahYarMahdavi',
+                    version: 1,
+                    exportedAt: new Date().toISOString(),
+                    data: appState
+                };
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `hamrah-yar-backup-${getTodayISO()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('فایل پشتیبان با موفقیت دانلود شد 💾');
+            } catch (err) {
+                showToast('خطا در تهیه فایل پشتیبان', true);
+            }
+        }
+
+        function importDatabaseJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    const importedData = parsed.data || parsed;
+                    if (!importedData.schema || !importedData.records) {
+                        throw new Error('ساختار فایل نامعتبر است');
+                    }
+
+                    const recordCount = Object.keys(importedData.records).length;
+                    openModal(
+                        'تأیید بازگردانی اطلاعات',
+                        `فایل پشتیبان معتبر است و شامل سوابق ${toPersianDigits(recordCount)} روز می‌باشد. آیا می‌خواهید اطلاعات فعلی با این فایل جایگزین شود؟`,
+                        [
+                            { text: 'انصراف', style: 'secondary', onClick: closeModal },
+                            {
+                                text: 'بازگردانی اطلاعات',
+                                style: 'primary',
+                                onClick: () => {
+                                    appState = importedData;
+                                    saveDatabase();
+                                    applyTheme();
+                                    renderChecklistView();
+                                    closeModal();
+                                    showToast('تمام اطلاعات و سوابق با موفقیت بازیابی شدند ✓');
+                                }
+                            }
+                        ]
+                    );
+                } catch (err) {
+                    showToast('فایل انتخاب‌شده معتبر نیست!', true);
+                } finally {
+                    event.target.value = '';
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        /* ==========================================================================
+           ۹. ناوبری تب‌ها، حالت شب، مودال سفارشی و تنظیمات نصب امن PWA
+           ========================================================================== */
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const isActive = btn.dataset.tab === tabName;
+                btn.className = isActive
+                    ? 'nav-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 transition'
+                    : 'nav-btn flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition';
+            });
+
+            if (tabName === 'checklist') renderChecklistView();
+            if (tabName === 'analytics') renderAnalyticsView();
+            if (tabName === 'manage') renderManageView();
+        }
+
+        function toggleDarkMode() {
+            appState.darkMode = !appState.darkMode;
+            saveDatabase();
+            applyTheme();
+            if (!document.getElementById('tab-analytics').classList.contains('hidden')) {
+                renderAnalyticsView();
+            }
+        }
+
+        function applyTheme() {
+            if (appState.darkMode) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        function openModal(title, message, actions) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            const actionsEl = document.getElementById('modalActions');
+            actionsEl.innerHTML = '';
+
+            actions.forEach(act => {
+                const btn = document.createElement('button');
+                btn.textContent = act.text;
+                btn.onclick = act.onClick;
+                if (act.style === 'danger') {
+                    btn.className = 'px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition';
+                } else if (act.style === 'primary') {
+                    btn.className = 'px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition';
+                } else {
+                    btn.className = 'px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 transition';
+                }
+                actionsEl.appendChild(btn);
+            });
+
+            const modal = document.getElementById('customModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('customModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        let toastTimer = null;
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toastNotification');
+            const content = document.getElementById('toastContent');
+            document.getElementById('toastText').textContent = message;
+
+            content.className = isError
+                ? 'px-4 py-2.5 rounded-2xl bg-rose-600 text-white text-xs font-bold shadow-xl flex items-center gap-2'
+                : 'px-4 py-2.5 rounded-2xl bg-slate-900/95 dark:bg-emerald-700 text-white text-xs font-bold shadow-xl flex items-center gap-2';
+
+            toast.classList.remove('opacity-0', '-translate-y-2');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+            }, 2600);
+        }
+
+        /* ثبت فایل Service Worker مستقل؛ سازگار با مسیر زیرشاخه GitHub Pages */
+        function setupPWA() {
+            if (!('serviceWorker' in navigator)) return;
+            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') return;
+            navigator.serviceWorker.register('./sw.js', { scope: './' })
+                .catch(error => console.warn('Service Worker registration failed:', error));
+        }
+
+        /* ==========================================================================
+           ۱۰. راه‌اندازی اولیه برنامه
+           ========================================================================== */
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDatabase();
+            setupUserProfile();
+            applyTheme();
+            renderQuote();
+            renderChecklistView();
+            setupPWA();
+        });
+    </script>
+</body>
+</html>
