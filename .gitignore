@@ -33,7 +33,7 @@ node_modules/
 
 # Capacitor generated files
 www/
-android/
+/android/
 ios/
 
 # Signing credentials
