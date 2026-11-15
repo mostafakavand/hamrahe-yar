@@ -2052,6 +2052,48 @@
             modal.classList.remove('flex');
         }
 
+        async function shareJPEGPreview() {
+            try {
+                const preview = window.currentJPEGPreview;
+
+                if (!preview) {
+                    showToast('تصویری برای اشتراک‌گذاری وجود ندارد.', true);
+                    return;
+                }
+
+                if (!window.HamrahNative?.Filesystem || !window.HamrahNative?.Share) {
+                    throw new Error('Native sharing plugins are not available.');
+                }
+
+                const base64Data = preview.dataUrl.split(',')[1];
+                const filePath = `hamrah-yar-${Date.now()}.jpg`;
+
+                const savedFile = await window.HamrahNative.Filesystem.writeFile({
+                    path: filePath,
+                    data: base64Data,
+                    directory: window.HamrahNative.Directory.Cache,
+                    recursive: true
+                });
+
+                const fileUri = savedFile.uri;
+
+                // نگهداری مسیر فایل موقت برای استفاده در مرحله حذف
+                window.currentJPEGPreview.tempUri = fileUri;
+                window.currentJPEGPreview.tempPath = filePath;
+
+                await window.HamrahNative.Share.share({
+                    title: 'گزارش تصویری همراهِ یار',
+                    text: 'گزارش تصویری همراهِ یار',
+                    files: [fileUri],
+                    dialogTitle: 'اشتراک‌گذاری تصویر'
+                });
+
+            } catch (err) {
+                console.error('JPEG sharing error:', err);
+                showToast('اشتراک‌گذاری تصویر ناموفق بود.', true);
+            }
+        }
+
         function openJPEGPreview() {
             const preview = window.currentJPEGPreview;
             if (!preview) return;
