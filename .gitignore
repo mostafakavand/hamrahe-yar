@@ -1,7 +1,29 @@
+
+# Operating system files
 .DS_Store
 Thumbs.db
-*.log
+Desktop.ini
+
+# Editor and IDE files
 .vscode/
 .idea/
-.env
-.env.*
+*.swp
+*.swo
+
+# Temporary and backup files
+*.tmp
+*.temp
+*.bak
+*.log
+
+# Android build outputs
+.gradle/
+build/
+*/build/
+local.properties
+*.apk
+*.aab
+
+# Personal data and backups
+*.json.bak
+backups/

@@ -1,0 +1,14 @@
+
+{
+  "name": "همراهِ یار",
+  "short_name": "همراه یار",
+  "description": "چک‌لیست ارزیابی روزانه مهدوی",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#166534",
+  "background_color": "#ffffff"
+}
