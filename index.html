@@ -2065,26 +2065,39 @@
                     throw new Error('Native sharing plugins are not available.');
                 }
 
-                const base64Data = preview.dataUrl.split(',')[1];
-                const filePath = `hamrah-yar-${Date.now()}.jpg`;
+                const filesystem = window.HamrahNative.Filesystem;
 
-                const savedFile = await window.HamrahNative.Filesystem.writeFile({
+                // حذف فایل موقت قبلی، در صورت وجود
+                if (preview.tempPath) {
+                    try {
+                        await filesystem.deleteFile({
+                            path: preview.tempPath,
+                            directory: window.HamrahNative.Directory.Cache
+                        });
+                    } catch (cleanupError) {
+                        console.warn('Previous temporary file cleanup:', cleanupError);
+                    }
+                }
+
+                // استفاده از نام انتخاب‌شده توسط کاربر
+                const filePath = preview.fileName;
+
+                const base64Data = preview.dataUrl.split(',')[1];
+
+                const savedFile = await filesystem.writeFile({
                     path: filePath,
                     data: base64Data,
                     directory: window.HamrahNative.Directory.Cache,
                     recursive: true
                 });
 
-                const fileUri = savedFile.uri;
-
-                // نگهداری مسیر فایل موقت برای استفاده در مرحله حذف
-                window.currentJPEGPreview.tempUri = fileUri;
-                window.currentJPEGPreview.tempPath = filePath;
+                preview.tempUri = savedFile.uri;
+                preview.tempPath = filePath;
 
                 await window.HamrahNative.Share.share({
-                    title: 'گزارش تصویری همراهِ یار',
+                    title: preview.fileName,
                     text: 'گزارش تصویری همراهِ یار',
-                    files: [fileUri],
+                    files: [savedFile.uri],
                     dialogTitle: 'اشتراک‌گذاری تصویر'
                 });
 
