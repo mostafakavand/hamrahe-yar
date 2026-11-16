@@ -2148,6 +2148,65 @@
                 showToast('ذخیره تصویر در گالری ناموفق بود.', true);
             }
         }
+        function renameJPEGPreview() {
+            const preview = window.currentJPEGPreview;
+
+            if (!preview) {
+                showToast('تصویری برای تغییر نام وجود ندارد.', true);
+                return;
+            }
+
+            const currentName = preview.fileName.replace(/\.jpg$/i, '');
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentName;
+            input.placeholder = 'نام جدید تصویر';
+            input.className = 'w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm';
+
+            openModal('تغییر نام تصویر', 'نام جدید را وارد کنید.', [
+                {
+                    text: 'انصراف',
+                    style: 'secondary',
+                    onClick: closeModal
+                },
+                {
+                    text: 'ذخیره نام',
+                    style: 'primary',
+                    onClick: () => {
+                        const newName = input.value.trim();
+
+                        if (!newName) {
+                            showToast('نام تصویر نمی‌تواند خالی باشد.', true);
+                            input.focus();
+                            return;
+                        }
+
+                        const safeName = newName
+                            .replace(/\.jpg$/i, '')
+                            .replace(/[\\/:*?"<>|]/g, '-')
+                            .trim();
+
+                        if (!safeName) {
+                            showToast('نام واردشده معتبر نیست.', true);
+                            input.focus();
+                            return;
+                        }
+
+                        preview.fileName = safeName + '.jpg';
+
+                        document.getElementById('jpegPreviewFileName').textContent =
+                            preview.fileName;
+
+                        closeModal();
+                        showToast('نام تصویر تغییر کرد.');
+                    }
+                }
+            ]);
+
+            document.getElementById('modalMessage').appendChild(input);
+            input.focus();
+        }
 
         function openJPEGPreview() {
             const preview = window.currentJPEGPreview;
