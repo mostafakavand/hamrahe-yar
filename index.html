@@ -2148,6 +2148,49 @@
                 showToast('ذخیره تصویر در گالری ناموفق بود.', true);
             }
         }
+        async function deleteJPEGPreview() {
+            const preview = window.currentJPEGPreview;
+
+            if (!preview) {
+                closeJPEGPreview();
+                return;
+            }
+
+            openModal('حذف تصویر', 'آیا از حذف تصویر موقت اطمینان دارید؟', [
+                {
+                    text: 'انصراف',
+                    style: 'secondary',
+                    onClick: closeModal
+                },
+                {
+                    text: 'حذف تصویر',
+                    style: 'danger',
+                    onClick: async () => {
+                        try {
+                            if (preview.tempPath && window.HamrahNative?.Filesystem) {
+                                await window.HamrahNative.Filesystem.deleteFile({
+                                    path: preview.tempPath,
+                                    directory: window.HamrahNative.Directory.Cache
+                                });
+                            }
+
+                            window.currentJPEGPreview = null;
+
+                            document.getElementById('jpegPreviewImage').src = '';
+                            document.getElementById('jpegPreviewFileName').textContent = '';
+
+                            closeModal();
+                            closeJPEGPreview();
+
+                            showToast('تصویر موقت با موفقیت حذف شد.');
+                        } catch (err) {
+                            console.error('JPEG deletion error:', err);
+                            showToast('حذف تصویر ناموفق بود.', true);
+                        }
+                    }
+                }
+            ]);
+        }
         function renameJPEGPreview() {
             const preview = window.currentJPEGPreview;
 
