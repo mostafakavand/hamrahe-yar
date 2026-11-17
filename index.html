@@ -603,6 +603,45 @@
                     </button>
                 </div>
 
+
+                <!-- انتخاب مستقل نوع نمودار خروجی JPEG -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-xs font-extrabold text-slate-700 dark:text-slate-200">
+                            📊 نوع نمودار خروجی JPEG
+                        </span>
+                        <span id="jpegChartTypeLabel" class="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                            منحنی روند
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button type="button" onclick="setJPEGChartType('line')"
+                            data-jpeg-chart-type="line"
+                            class="jpeg-chart-type-btn py-2.5 px-2 rounded-xl text-xs font-bold border border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                            📈 منحنی روند
+                        </button>
+
+                        <button type="button" onclick="setJPEGChartType('bar')"
+                            data-jpeg-chart-type="bar"
+                            class="jpeg-chart-type-btn py-2.5 px-2 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                            📊 میله‌ای
+                        </button>
+
+                        <button type="button" onclick="setJPEGChartType('radar')"
+                            data-jpeg-chart-type="radar"
+                            class="jpeg-chart-type-btn py-2.5 px-2 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                            🕸️ تعادل راداری
+                        </button>
+
+                        <button type="button" onclick="setJPEGChartType('heatmap')"
+                            data-jpeg-chart-type="heatmap"
+                            class="jpeg-chart-type-btn py-2.5 px-2 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                            🗓️ تقویم رنگی
+                        </button>
+                    </div>
+                </div>
+
                 <!-- انتخاب بازه زمانی و نوع نمودار -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <!-- بازه زمانی -->
@@ -954,6 +993,7 @@
         let currentQuoteIndex = new Date().getDate() % MAHDAVI_QUOTES.length;
         let currentChartRange = 7;
         let currentChartType = 'line';
+        let currentJPEGChartType = 'line';
         let chartInstance = null;
 
         /* ==========================================================================
@@ -1488,6 +1528,30 @@
             });
             renderAnalyticsView();
         }
+        function setJPEGChartType(type) {
+            const allowedTypes = ['line', 'bar', 'radar', 'heatmap'];
+
+            if (!allowedTypes.includes(type)) return;
+
+            currentJPEGChartType = type;
+
+            const labels = {
+                line: 'منحنی روند',
+                bar: 'میله‌ای',
+                radar: 'تعادل راداری',
+                heatmap: 'تقویم رنگی'
+            };
+
+            document.getElementById('jpegChartTypeLabel').textContent = labels[type];
+
+            document.querySelectorAll('.jpeg-chart-type-btn').forEach(btn => {
+                const isActive = btn.dataset.jpegChartType === type;
+
+                btn.className = isActive
+                    ? 'jpeg-chart-type-btn py-2.5 px-2 rounded-xl text-xs font-bold border border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                    : 'jpeg-chart-type-btn py-2.5 px-2 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300';
+            });
+        }
 
         function getRangeData(days) {
             const today = getTodayISO();
@@ -1924,7 +1988,9 @@
                 ctx.font = '900 34px Vazirmatn, sans-serif';
                 ctx.fillText(`${todayStats.evaluation.emoji} ${todayStats.evaluation.title}`, cardX + 70 + boxW * 2 + boxW / 2, boxY + 95);
 
-                // ۴. رسم نمودار روند اختصاصی باکیفیت بالا روی پوستر
+
+
+                // ۴. رسم نمودار مستقل انتخاب‌شده برای خروجی JPEG
                 const chartLeft = cardX + 165;
                 const chartRight = cardX + cardW - 50;
                 const chartTop = boxY + boxH + 70;
@@ -1932,83 +1998,305 @@
                 const chartW = chartRight - chartLeft;
                 const chartH = chartBottom - chartTop;
 
-                // خطوط راهنمای افقی و برچسب‌های توصیفی محور عمودی
-                const yLevels = [
-                    { val: 10, label: 'عالی 🏆' },
-                    { val: 8, label: 'خیلی خوب 🌟' },
-                    { val: 6, label: 'خوب ✅' },
-                    { val: 4, label: 'متوسط ➖' },
-                    { val: 2, label: 'ضعیف ⚠️' },
-                    { val: 0, label: 'خیلی ضعیف ❌' }
-                ];
+                const jpegChartLabels = {
+                    line: 'منحنی روند',
+                    bar: 'نمودار میله‌ای',
+                    radar: 'تعادل راداری',
+                    heatmap: 'تقویم رنگی عملکرد'
+                };
 
-                ctx.textAlign = 'right';
-                yLevels.forEach(lvl => {
-                    const y = chartBottom - (lvl.val / 10) * chartH;
-                    ctx.strokeStyle = '#e2e8f0';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(chartLeft, y);
-                    ctx.lineTo(chartRight, y);
-                    ctx.stroke();
-
-                    ctx.fillStyle = '#475569';
-                    ctx.font = '700 20px Vazirmatn, sans-serif';
-                    ctx.fillText(lvl.label, chartLeft - 18, y + 7);
-                });
-
-                // رسم منحنی و نقاط داده
-                const stepX = data.length > 1 ? chartW / (data.length - 1) : chartW / 2;
-                const points = data.map((d, idx) => ({
-                    x: chartLeft + idx * stepX,
-                    y: chartBottom - (d.score10 / 10) * chartH,
-                    d
-                }));
-
-                // ناحیه سایه زیر نمودار
-                if (points.length > 1) {
-                    const areaGrad = ctx.createLinearGradient(0, chartTop, 0, chartBottom);
-                    areaGrad.addColorStop(0, `${palette.area}0.30)`);
-                    areaGrad.addColorStop(1, `${palette.area}0.02)`);
-
-                    ctx.beginPath();
-                    ctx.moveTo(points[0].x, chartBottom);
-                    points.forEach(p => ctx.lineTo(p.x, p.y));
-                    ctx.lineTo(points[points.length - 1].x, chartBottom);
-                    ctx.closePath();
-                    ctx.fillStyle = areaGrad;
-                    ctx.fill();
-
-                    // خط اصلی روند
-                    ctx.beginPath();
-                    ctx.moveTo(points[0].x, points[0].y);
-                    points.forEach(p => ctx.lineTo(p.x, p.y));
-                    ctx.strokeStyle = palette.chart;
-                    ctx.lineWidth = 6;
-                    ctx.lineJoin = 'round';
-                    ctx.stroke();
-                }
-
-                // نقاط و تاریخ‌های محور افقی
+                // عنوان نمودار
+                ctx.fillStyle = '#334155';
                 ctx.textAlign = 'center';
-                const labelInterval = data.length > 15 ? 3 : (data.length > 8 ? 2 : 1);
-                points.forEach((p, idx) => {
-                    // دایره نقطه
+                ctx.font = '800 25px Vazirmatn, sans-serif';
+                ctx.fillText(jpegChartLabels[currentJPEGChartType] || 'گزارش عملکرد', W / 2, chartTop - 25);
+
+                // رنگ‌های سطوح ارزیابی
+                const levelColors = {
+                    5: '#059669',
+                    4: '#14b8a6',
+                    3: '#3b82f6',
+                    2: '#fbbf24',
+                    1: '#f97316',
+                    0: '#f43f5e'
+                };
+
+                // حالت اول: تقویم رنگی
+                if (currentJPEGChartType === 'heatmap') {
+                    const columns = data.length <= 7 ? data.length : 7;
+                    const rows = Math.ceil(data.length / columns);
+                    const gap = 12;
+                    const tileW = (chartW - gap * (columns - 1)) / columns;
+                    const tileH = Math.min(112, (chartH - gap * (rows - 1)) / rows);
+                    const totalH = rows * tileH + (rows - 1) * gap;
+                    const startY = chartTop + Math.max(0, (chartH - totalH) / 2);
+
+                    data.forEach((d, idx) => {
+                        const col = idx % columns;
+                        const row = Math.floor(idx / columns);
+                        const x = chartLeft + col * (tileW + gap);
+                        const y = startY + row * (tileH + gap);
+
+                        const bg = d.hasRecord
+                            ? (levelColors[d.evaluation.level] || '#94a3b8')
+                            : '#e2e8f0';
+
+                        roundRect(ctx, x, y, tileW, tileH, 14, bg);
+
+                        ctx.textAlign = 'center';
+                        ctx.fillStyle = d.hasRecord ? '#ffffff' : '#64748b';
+                        ctx.font = '700 18px Vazirmatn, sans-serif';
+                        ctx.fillText(d.shortDate, x + tileW / 2, y + 27);
+
+                        ctx.font = '800 27px Vazirmatn, sans-serif';
+                        ctx.fillText(
+                            d.hasRecord ? d.evaluation.emoji : '·',
+                            x + tileW / 2,
+                            y + 61
+                        );
+
+                        ctx.font = '700 14px Vazirmatn, sans-serif';
+                        ctx.fillText(
+                            d.hasRecord ? d.evaluation.title : 'ثبت نشده',
+                            x + tileW / 2,
+                            y + 88
+                        );
+                    });
+
+                // حالت دوم: نمودار راداری
+                } else if (currentJPEGChartType === 'radar') {
+                    const catLabels = appState.schema.categories.map(
+                        c => c.title.replace(/^بخش\s+(اول|دوم|سوم):\s*/, '')
+                    );
+
+                    const catScores = appState.schema.categories.map(cat => {
+                        const catItems = appState.schema.items.filter(
+                            i => i.categoryId === cat.id && i.active
+                        );
+
+                        if (catItems.length === 0) return 0;
+
+                        let sumPercent = 0;
+                        let daysCount = 0;
+
+                        data.forEach(d => {
+                            if (d.hasRecord) {
+                                const rec = appState.records[d.iso];
+                                const checkedInCat = catItems.filter(
+                                    i => rec.checkedIds.includes(i.id)
+                                ).length;
+
+                                sumPercent += (checkedInCat / catItems.length) * 100;
+                                daysCount++;
+                            }
+                        });
+
+                        return daysCount > 0
+                            ? Math.round(sumPercent / daysCount)
+                            : 0;
+                    });
+
+                    if (catLabels.length < 3) {
+                        catLabels.push('استمرار روزانه');
+                        const activeDays = data.filter(d => d.hasRecord).length;
+                        catScores.push(Math.round((activeDays / data.length) * 100));
+                    }
+
+                    const centerX = (chartLeft + chartRight) / 2;
+                    const centerY = chartTop + chartH / 2;
+                    const radius = Math.min(chartW * 0.29, chartH * 0.34);
+                    const count = catLabels.length;
+
+                    // حلقه‌های راهنمای رادار
+                    for (let level = 1; level <= 5; level++) {
+                        const r = radius * level / 5;
+                        ctx.beginPath();
+
+                        for (let i = 0; i < count; i++) {
+                            const angle = -Math.PI / 2 + (Math.PI * 2 * i / count);
+                            const x = centerX + Math.cos(angle) * r;
+                            const y = centerY + Math.sin(angle) * r;
+
+                            if (i === 0) ctx.moveTo(x, y);
+                            else ctx.lineTo(x, y);
+                        }
+
+                        ctx.closePath();
+                        ctx.strokeStyle = '#cbd5e1';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+
+                    // محورهای رادار و برچسب‌ها
+                    for (let i = 0; i < count; i++) {
+                        const angle = -Math.PI / 2 + (Math.PI * 2 * i / count);
+                        const x = centerX + Math.cos(angle) * radius;
+                        const y = centerY + Math.sin(angle) * radius;
+
+                        ctx.beginPath();
+                        ctx.moveTo(centerX, centerY);
+                        ctx.lineTo(x, y);
+                        ctx.strokeStyle = '#cbd5e1';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+
+                        const labelX = centerX + Math.cos(angle) * (radius + 48);
+                        const labelY = centerY + Math.sin(angle) * (radius + 48);
+
+                        ctx.fillStyle = '#334155';
+                        ctx.font = '700 17px Vazirmatn, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(catLabels[i], labelX, labelY);
+                    }
+
+                    // چندضلعی عملکرد
                     ctx.beginPath();
-                    ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
-                    ctx.fillStyle = p.d.hasRecord ? p.d.evaluation.color : '#94a3b8';
+
+                    catScores.forEach((score, i) => {
+                        const angle = -Math.PI / 2 + (Math.PI * 2 * i / count);
+                        const r = radius * Math.max(0, Math.min(100, score)) / 100;
+                        const x = centerX + Math.cos(angle) * r;
+                        const y = centerY + Math.sin(angle) * r;
+
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    });
+
+                    ctx.closePath();
+                    ctx.fillStyle = 'rgba(16, 185, 129, 0.25)';
                     ctx.fill();
-                    ctx.lineWidth = 3;
-                    ctx.strokeStyle = '#ffffff';
+                    ctx.strokeStyle = palette.chart;
+                    ctx.lineWidth = 5;
                     ctx.stroke();
 
-                    // تاریخ پایین نمودار
-                    if (idx % labelInterval === 0 || idx === points.length - 1) {
-                        ctx.fillStyle = '#334155';
-                        ctx.font = '600 18px Vazirmatn, sans-serif';
-                        ctx.fillText(p.d.shortDate, p.x, chartBottom + 42);
+                    catScores.forEach((score, i) => {
+                        const angle = -Math.PI / 2 + (Math.PI * 2 * i / count);
+                        const r = radius * Math.max(0, Math.min(100, score)) / 100;
+
+                        ctx.beginPath();
+                        ctx.arc(
+                            centerX + Math.cos(angle) * r,
+                            centerY + Math.sin(angle) * r,
+                            8, 0, Math.PI * 2
+                        );
+                        ctx.fillStyle = palette.chart;
+                        ctx.fill();
+                    });
+
+                // حالت سوم و چهارم: نمودار خطی و میله‌ای
+                } else {
+                    const yLevels = [10, 8, 6, 4, 2, 0];
+
+                    yLevels.forEach(val => {
+                        const y = chartBottom - (val / 10) * chartH;
+
+                        ctx.beginPath();
+                        ctx.moveTo(chartLeft, y);
+                        ctx.lineTo(chartRight, y);
+                        ctx.strokeStyle = '#e2e8f0';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#475569';
+                        ctx.font = '700 19px Vazirmatn, sans-serif';
+                        ctx.textAlign = 'right';
+                        ctx.fillText(toPersianDigits(val), chartLeft - 20, y + 7);
+                    });
+
+                    const stepX = data.length > 1
+                        ? chartW / (data.length - 1)
+                        : chartW / 2;
+
+                    const points = data.map((d, idx) => ({
+                        x: data.length > 1
+                            ? chartLeft + idx * stepX
+                            : chartLeft + chartW / 2,
+                        y: chartBottom - (d.score10 / 10) * chartH,
+                        d
+                    }));
+
+                    const labelInterval = data.length > 15
+                        ? 3
+                        : (data.length > 8 ? 2 : 1);
+
+                    if (currentJPEGChartType === 'line') {
+                        // سایه زیر منحنی
+                        if (points.length > 1) {
+                            const areaGrad = ctx.createLinearGradient(
+                                0, chartTop, 0, chartBottom
+                            );
+
+                            areaGrad.addColorStop(0, `${palette.area}0.30)`);
+                            areaGrad.addColorStop(1, `${palette.area}0.02)`);
+
+                            ctx.beginPath();
+                            ctx.moveTo(points[0].x, chartBottom);
+                            points.forEach(p => ctx.lineTo(p.x, p.y));
+                            ctx.lineTo(points[points.length - 1].x, chartBottom);
+                            ctx.closePath();
+                            ctx.fillStyle = areaGrad;
+                            ctx.fill();
+
+                            // خط روند
+                            ctx.beginPath();
+                            ctx.moveTo(points[0].x, points[0].y);
+                            points.forEach(p => ctx.lineTo(p.x, p.y));
+                            ctx.strokeStyle = palette.chart;
+                            ctx.lineWidth = 6;
+                            ctx.lineJoin = 'round';
+                            ctx.stroke();
+                        }
+
+                        points.forEach((p, idx) => {
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+                            ctx.fillStyle = p.d.hasRecord
+                                ? p.d.evaluation.color
+                                : '#94a3b8';
+                            ctx.fill();
+
+                            ctx.lineWidth = 3;
+                            ctx.strokeStyle = '#ffffff';
+                            ctx.stroke();
+
+                            if (idx % labelInterval === 0 || idx === points.length - 1) {
+                                ctx.fillStyle = '#334155';
+                                ctx.font = '600 18px Vazirmatn, sans-serif';
+                                ctx.textAlign = 'center';
+                                ctx.fillText(p.d.shortDate, p.x, chartBottom + 42);
+                            }
+                        });
+
+                    } else {
+                        // نمودار میله‌ای
+                        const barSlot = chartW / data.length;
+                        const barW = Math.max(8, Math.min(42, barSlot * 0.62));
+
+                        points.forEach((p, idx) => {
+                            const barH = chartBottom - p.y;
+                            const x = p.x - barW / 2;
+
+                            roundRect(
+                                ctx,
+                                x,
+                                p.y,
+                                barW,
+                                Math.max(4, barH),
+                                Math.min(10, barW / 3),
+                                p.d.hasRecord
+                                    ? p.d.evaluation.color
+                                    : '#cbd5e1'
+                            );
+
+                            if (idx % labelInterval === 0 || idx === points.length - 1) {
+                                ctx.fillStyle = '#334155';
+                                ctx.font = '600 18px Vazirmatn, sans-serif';
+                                ctx.textAlign = 'center';
+                                ctx.fillText(p.d.shortDate, p.x, chartBottom + 42);
+                            }
+                        });
                     }
-                });
+                }
 
                 // ۵. فوتر و جمله مهدوی انگیزشی در پایین پوستر
                 const q = MAHDAVI_QUOTES[currentQuoteIndex % MAHDAVI_QUOTES.length];
