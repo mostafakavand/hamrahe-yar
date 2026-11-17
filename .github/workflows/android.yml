@@ -135,8 +135,8 @@ jobs:
           echo "=== APK FILE ==="
           ls -lh "$APK"
 
-          echo "=== APK ICON RESOURCES ==="
-          unzip -l "$APK" | grep -E 'ic_launcher|mipmap'
+          echo "=== APK RESOURCE LIST ==="
+          unzip -l "$APK" | head -80
 
       - name: Sign release APK
         env:
