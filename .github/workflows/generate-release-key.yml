@@ -1,0 +1,65 @@
+
+name: Generate Android Release Key
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate-key:
+    name: Generate Release Key
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Generate and encrypt keystore
+        env:
+          KEY_BACKUP_PASSWORD: ${{ secrets.KEY_BACKUP_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+
+          if [ -z "$KEY_BACKUP_PASSWORD" ]; then
+            echo "Backup password is missing."
+            exit 1
+          fi
+
+          mkdir -p release-key
+
+          keytool -genkeypair \
+            -keystore release-key/hamrahe-yar-release.jks \
+            -alias hamrahe-yar \
+            -keyalg RSA \
+            -keysize 4096 \
+            -validity 10000 \
+            -storepass "$KEY_BACKUP_PASSWORD" \
+            -keypass "$KEY_BACKUP_PASSWORD" \
+            -dname "CN=Hamrah-e-Yar, OU=Mobile, O=Hamrah-e-Yar, L=Iran, C=IR"
+
+          openssl enc -aes-256-cbc \
+            -salt \
+            -pbkdf2 \
+            -iter 600000 \
+            -in release-key/hamrahe-yar-release.jks \
+            -out release-key/hamrahe-yar-release.jks.enc \
+            -pass env:KEY_BACKUP_PASSWORD
+
+          rm release-key/hamrahe-yar-release.jks
+
+          echo "Encrypted keystore backup created."
+
+      - name: Upload encrypted backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: hamrah-yar-release-key-backup
+          path: release-key/hamrahe-yar-release.jks.enc
+          if-no-files-found: error
+          retention-days: 90

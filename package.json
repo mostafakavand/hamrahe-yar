@@ -1,7 +1,7 @@
-
+﻿
 {
   "name": "hamrahe-yar",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Daily Mahdavi evaluation checklist",
   "scripts": {
@@ -21,3 +21,4 @@
     "esbuild": "^0.25.0"
   }
 }
+
