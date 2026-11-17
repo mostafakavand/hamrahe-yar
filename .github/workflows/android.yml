@@ -52,14 +52,6 @@ jobs:
           echo "=== AndroidManifest.xml ==="
           grep -nE 'android:icon|android:roundIcon' android/app/src/main/AndroidManifest.xml
 
-      - name: Inspect APK launcher icon
-        run: |
-          APK=$(find android/app/build/outputs/apk -name "*.apk" | head -n 1)
-          echo "=== APK FILE ==="
-          echo "$APK"
-          echo "=== APK ICON RESOURCES ==="
-          unzip -l "$APK" | grep -E 'ic_launcher|mipmap'
-
           echo "=== Launcher icon resources ==="
           find android/app/src/main/res -type f -name 'ic_launcher*' | sort
 
@@ -135,6 +127,16 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease
+
+      - name: Inspect APK launcher icon
+        run: |
+          APK="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+
+          echo "=== APK FILE ==="
+          ls -lh "$APK"
+
+          echo "=== APK ICON RESOURCES ==="
+          unzip -l "$APK" | grep -E 'ic_launcher|mipmap'
 
       - name: Sign release APK
         env:
